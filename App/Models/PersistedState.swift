@@ -40,6 +40,8 @@ struct PersistedState: Codable, Sendable {
     var dismissedSuggestions: Set<String> = []
     /// "occasionID@yyyy-MM-dd" for Live Activities already started locally.
     var startedActivityKeys: Set<String> = []
+    /// occasionID -> LiveActivityPlanner key for Live Activities scheduled on iOS 26+.
+    var scheduledActivities: [String: String] = [:]
 
     init() {}
 
@@ -56,5 +58,6 @@ struct PersistedState: Codable, Sendable {
         lastSyncedAt = try c.decodeIfPresent(Date.self, forKey: .lastSyncedAt)
         dismissedSuggestions = try c.decodeIfPresent(Set<String>.self, forKey: .dismissedSuggestions) ?? []
         startedActivityKeys = try c.decodeIfPresent(Set<String>.self, forKey: .startedActivityKeys) ?? []
+        scheduledActivities = try c.decodeIfPresent([String: String].self, forKey: .scheduledActivities) ?? [:]
     }
 }

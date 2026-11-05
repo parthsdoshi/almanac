@@ -20,6 +20,7 @@ enum NotificationPlanner {
         occasions: [Occasion],
         settings: Settings,
         includeDayOf: Bool,
+        dayOfCoveredByLiveActivity: Set<String> = [],
         now: Date,
         calendar: Calendar
     ) -> [Item] {
@@ -34,7 +35,8 @@ enum NotificationPlanner {
                 add(&items, o, kind: "lead", day: lead, hour: settings.sendHour, now: now, calendar: calendar,
                     title: "\(o.title) is \(when)", body: "\(dateText). Tap to plan a message.")
             }
-            if includeDayOf {
+            // A scheduled Live Activity alerts when it starts, so skip the duplicate.
+            if includeDayOf, !dayOfCoveredByLiveActivity.contains(o.id) {
                 add(&items, o, kind: "dayof", day: next, hour: settings.sendHour, now: now, calendar: calendar,
                     title: "\(o.title) is today", body: "Tap to message or call.")
             }

@@ -164,31 +164,70 @@ final class AppModel {
 
     private func refreshSchedules() async {
         let active = activeOccasions
+        let coveredByLiveActivity = await updateLiveActivities(active: active)
         let items = NotificationPlanner.plan(
             occasions: active,
             settings: settings,
             includeDayOf: !server.isConfigured,  // the server's Live Activity alert covers day-of
+            dayOfCoveredByLiveActivity: coveredByLiveActivity,
             now: .now,
             calendar: calendar
         )
         await notifications.replace(with: items)
-        await updateLiveActivities(active: active)
         await syncServer(force: false)
     }
 
-    /// Ends activities that aren't for today. Without a server, also starts
-    /// today's activities locally (once per occasion per day). With a server we
-    /// never start locally, or you'd get duplicates when the push lands.
-    private func updateLiveActivities(active: [Occasion]) async {
+    /// Keeps Live Activities in line with the occasions, and returns the ids whose
+    /// next day-of is covered by a scheduled Live Activity.
+    ///
+    /// - With a server: only ends stale ones. The server starts them, and starting
+    ///   locally too would make duplicates.
+    /// - No server, iOS 26+: schedules the next few to start at your send hour,
+    ///   topped up every time the app is opened.
+    /// - No server, older iOS (or anything not scheduled): starts today's when
+    ///   the app is opened on the day, once per occasion per day.
+    @discardableResult
+    private func updateLiveActivities(active: [Occasion]) async -> Set<String> {
         let now = Date()
         let todays = active.filter {
             Recurrence.daysUntil(Recurrence.next($0.date, onOrAfter: now, calendar: calendar), from: now, calendar: calendar) == 0
         }
-        var keep = Set(todays.map(\.id))
+        let local = !server.isConfigured && liveActivities.areEnabled
+        let plan = local && LiveActivityManager.canSchedule
+            ? LiveActivityPlanner.plan(occasions: active, sendHour: settings.sendHour, now: now, calendar: calendar)
+            : []
+
+        var keep = Set(todays.map(\.id)).union(plan.map(\.occasionID))
         if let previewOccasionID { keep.insert(previewOccasionID) }
         await liveActivities.endAll(except: keep)
 
-        guard !server.isConfigured, liveActivities.areEnabled else { return }
+        var covered = Set<String>()
+        if #available(iOS 26.0, *), !plan.isEmpty {
+            let pending = liveActivities.pendingOccasionIDs
+            for p in plan {
+                if pending.contains(p.occasionID), store.state.scheduledActivities[p.occasionID] == p.key {
+                    covered.insert(p.occasionID)
+                    continue
+                }
+                // Scheduled for an old day or hour: replace it.
+                if pending.contains(p.occasionID) { await liveActivities.end(occasionID: p.occasionID) }
+                guard let o = active.first(where: { $0.id == p.occasionID }) else { continue }
+                do {
+                    try liveActivities.schedule(o, at: p.start)
+                    store.update { $0.scheduledActivities[p.occasionID] = p.key }
+                    covered.insert(p.occasionID)
+                } catch {
+                    // In the background, or over the system's limit. The day-of
+                    // notification covers it, and we try again next time the app opens.
+                }
+            }
+        }
+        let planned = Set(plan.map(\.occasionID))
+        if store.state.scheduledActivities.keys.contains(where: { !planned.contains($0) }) {
+            store.update { s in s.scheduledActivities = s.scheduledActivities.filter { planned.contains($0.key) } }
+        }
+
+        guard local else { return covered }
         let today = DayKey(now, calendar: calendar).rawValue
         for o in todays {
             let key = "\(o.id)@\(today)"
@@ -203,6 +242,7 @@ final class AppModel {
                 // Usually the app isn't in the foreground; try again next launch.
             }
         }
+        return covered
     }
 
     private func scheduleBackgroundRefresh() {
