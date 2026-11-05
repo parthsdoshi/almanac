@@ -32,6 +32,8 @@ Widget/                Live Activity: Lock Screen + Dynamic Island  <- design pa
 Tests/                 Swift Testing unit tests for the date, stats, parsing and merge logic
 server/                Node push server (no dependencies)
 render.yaml            Render Blueprint for the server
+.github/workflows/     TestFlight upload (run by hand)
+ci/                    Export settings for that workflow
 ```
 
 ## What you need
@@ -89,6 +91,33 @@ The key stays with you and Render. Don't commit it (`*.p8` is gitignored).
 ### Why a web service and not just a cron job
 
 A cron job can't receive the app's uploads, and Render cron jobs can't have a disk. "Cron only" would really be cron ($1+/month) + a web service + a $6/month Postgres, so three things to run for the same price. One small always-on service with a JSON file on a disk is simpler. It checks every 5 minutes, which also handles time zones: the push goes out at your send hour wherever your phone says you are, so it still lands in the morning when you're in Mumbai or Colombo.
+
+## 4. TestFlight (so others can install it)
+
+`.github/workflows/testflight.yml` builds the app on a GitHub Mac runner, signs it with Apple's cloud-managed signing, and uploads it to TestFlight. Nothing runs on its own: you start it from Actions > TestFlight > Run workflow. Each run uses the run number as the build number.
+
+One-time setup:
+
+1. **Register the bundle ID.** developer.apple.com > Identifiers > + > App IDs. Use your `APP_BUNDLE_ID` and tick **Push Notifications**. (Building once from Xcode with Automatic signing does this too.)
+2. **Create the app in App Store Connect.** appstoreconnect.apple.com > Apps > + > New App: iOS, any name that's free (the home-screen name stays "Occasions"), pick that bundle ID, any SKU.
+3. **Make an App Store Connect API key.** App Store Connect > Users and Access > Integrations > App Store Connect API > +. Give it the **Admin** role, because cloud signing has to create a distribution certificate. Download the `.p8` (only once) and note the **Key ID** and the **Issuer ID** at the top of the page. This is a different key from the APNs one.
+4. **Add repo secrets** in GitHub > Settings > Secrets and variables > Actions:
+
+   | Secret | Value |
+   | --- | --- |
+   | `APPLE_TEAM_ID` | your Team ID |
+   | `APP_BUNDLE_ID` | your bundle ID |
+   | `ASC_KEY_ID` | the API key's Key ID |
+   | `ASC_ISSUER_ID` | the Issuer ID |
+   | `ASC_KEY_P8` | the whole contents of the API key's `.p8` file |
+   | `OCCASIONS_SERVER_HOST` | the Render host, no `https://` |
+   | `OCCASIONS_API_KEY` | the `API_KEY` Render generated |
+
+   The last two are optional; without them the TestFlight build runs without the server.
+
+Then run the workflow. Processing in App Store Connect takes a few minutes after the upload finishes. In App Store Connect > your app > TestFlight, add testers by Apple ID email under Internal Testing (people on your team) or External Testing (anyone, but the first build of each version needs a short Beta App Review).
+
+The icon in `App/Assets.xcassets` is a placeholder until the design pass. App Store Connect rejects uploads with no icon.
 
 ## What the server knows
 

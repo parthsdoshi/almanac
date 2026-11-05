@@ -1,0 +1,96 @@
+# Builds the iOS app on a Mac runner and uploads it to TestFlight.
+# Run it by hand: Actions > TestFlight > Run workflow.
+# Needs the repo secrets listed in README.md ("TestFlight").
+name: TestFlight
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Check secrets are set
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          missing=""
+          for name in APPLE_TEAM_ID APP_BUNDLE_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secrets:$missing (see README, TestFlight)"
+            exit 1
+          fi
+
+      - name: Write build settings and API key
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+          OCCASIONS_SERVER_HOST: ${{ secrets.OCCASIONS_SERVER_HOST }}
+          OCCASIONS_API_KEY: ${{ secrets.OCCASIONS_API_KEY }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          cat > Config/Secrets.xcconfig <<XC
+          DEVELOPMENT_TEAM = $APPLE_TEAM_ID
+          APP_BUNDLE_ID = $APP_BUNDLE_ID
+          OCCASIONS_SERVER_HOST = $OCCASIONS_SERVER_HOST
+          OCCASIONS_API_KEY = $OCCASIONS_API_KEY
+          XC
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          sed "s/TEAM_ID_PLACEHOLDER/$APPLE_TEAM_ID/" ci/ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Archive
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild archive \
+            -project Occasions.xcodeproj \
+            -scheme Occasions \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Occasions.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }}
+
+      - name: Upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Occasions.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Remove the API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/AuthKey.p8" Config/Secrets.xcconfig
