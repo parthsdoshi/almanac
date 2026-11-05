@@ -1,9 +1,11 @@
 # Compiles the app, widget and tests on a GitHub Mac runner for every pull
-# request, unsigned and for the Simulator, so Swift errors show up before
+# request and every push to main, unsigned and for the Simulator, so Swift errors show up before
 # anyone opens Xcode. Needs no secrets. Free on a public repo.
 name: Build
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
