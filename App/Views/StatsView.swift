@@ -80,7 +80,7 @@ private struct RateCard: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(Theme.Colors.sunk)
-                    Capsule().fill(Theme.Colors.acted).frame(width: geo.size.width * min(max(rate, 0), 1))
+                    Capsule().fill(Theme.Colors.acted).frame(width: geo.size.width * CGFloat(min(max(rate, 0), 1)))
                 }
             }
             .frame(height: 12)

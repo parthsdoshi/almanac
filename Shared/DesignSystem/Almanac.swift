@@ -56,8 +56,8 @@ struct ConfettiPiece: Identifiable {
                 id: i,
                 x: rng.unit(),
                 y: rng.unit(),
-                angle: rng.unit() * 120 - 60,
-                spin: rng.unit() * 720 - 360,
+                angle: Double(rng.unit()) * 120 - 60,
+                spin: Double(rng.unit()) * 720 - 360,
                 shape: roll < 0.45 ? .strip : (roll < 0.75 ? .dot : .squiggle),
                 colorIndex: Int(rng.next() % 1000),
                 size: 0.8 + rng.unit() * 0.5)
