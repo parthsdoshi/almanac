@@ -4,7 +4,7 @@ Birthday and anniversary reminders from your iOS Contacts, with a day-of Live Ac
 
 - Reads birthdays and anniversaries from Contacts. A couple's anniversary (linked through the spouse/partner field) becomes one occasion with both people.
 - A heads-up notification X days before (Settings, default 3) at your chosen hour.
-- On the day, a Live Activity started by the push server at your chosen hour, even if the app is closed:
+- On the day, a Live Activity at your chosen hour. No server needed: on iOS 26+ the phone schedules it ahead of time and starts it even if the app is closed. On older iOS it starts when you open the app that day.
   - **Message** opens Messages' compose sheet, addressed and prefilled. For a couple it's a group text.
   - **Call** opens iOS's call prompt. For a couple it asks which of them first.
   - **Mute** stops that occasion forever, without opening the app. You can undo it in Settings.
@@ -32,15 +32,15 @@ Shared/                Compiled into the app and the widget
   MuteOccasionIntent.swift   The Mute button
 Widget/                Live Activity: Lock Screen + Dynamic Island  <- design pass
 Tests/                 Swift Testing unit tests for the date, stats, parsing and merge logic
-server/                Node push server (no dependencies)
-render.yaml            Render Blueprint for the server
+server/                Optional Node push server (no dependencies)
+render.yaml            Render Blueprint for the optional server
 .github/workflows/     TestFlight upload (run by hand), build check on pull requests
 ci/                    Export settings for that workflow
 ```
 
 ## What you need
 
-- Xcode 16 or newer, and an iPhone on iOS 17.2+. Test on a real phone: push-to-start doesn't work in the Simulator.
+- Xcode 26 or newer (the scheduled start needs the iOS 26 SDK), and an iPhone on iOS 17.2+. iOS 26 gets the Live Activity on time without opening the app.
 - A paid Apple Developer Program membership. A free personal team can't use push notifications.
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`.
 
@@ -54,7 +54,7 @@ Fill in `Config/Secrets.xcconfig`:
 
 - `DEVELOPMENT_TEAM`: your Team ID (developer.apple.com/account, Membership details).
 - `APP_BUNDLE_ID`: something unique like `com.parthdoshi.occasions`. The widget becomes `<APP_BUNDLE_ID>.widget`.
-- Leave the two server values empty for now.
+- Leave the two server values empty. Empty means no server, which is the default now.
 
 ```sh
 xcodegen generate
@@ -64,6 +64,18 @@ open Occasions.xcodeproj
 Run the `Occasions` scheme on your phone. With Automatic signing, Xcode registers the bundle IDs and turns on Push Notifications for you. Without the server, reminders work and the day-of Live Activity starts when you open the app that day. Settings > "Preview Live Activity on this phone" shows it right away.
 
 Run the tests with Cmd-U.
+
+## How the day-of Live Activity starts without a server
+
+On iOS 26 and later, every time the app comes to the foreground it asks iOS to start a Live Activity for the next few occasions (up to 3, within 30 days) at your send hour, using ActivityKit's scheduled start. iOS shows an alert when each one starts. Apple doesn't document how many can be scheduled at once or how far ahead, and scheduled ones count toward the limit on running Live Activities, so the app keeps the list short and tops it up whenever you open it. Any occasion that isn't scheduled still gets a day-of notification at your send hour, so nothing is silently missed if you don't open the app for a while.
+
+On iOS 17.2 to 18, the Live Activity starts when you open the app on the day, and the day-of notification nudges you to.
+
+The push server below is optional. Setting `OCCASIONS_SERVER_HOST` turns it on and turns local scheduling off, so you never get two.
+
+## Optional: push server
+
+Skip sections 2 and 3 unless you want the server back (for example if scheduled starts turn out unreliable).
 
 ## 2. Make an APNs key
 
@@ -112,10 +124,7 @@ One-time setup:
    | `ASC_KEY_ID` | the API key's Key ID |
    | `ASC_ISSUER_ID` | the Issuer ID |
    | `ASC_KEY_P8` | the whole contents of the API key's `.p8` file |
-   | `OCCASIONS_SERVER_HOST` | the Render host, no `https://` |
-   | `OCCASIONS_API_KEY` | the `API_KEY` Render generated |
-
-   The last two are optional; without them the TestFlight build runs without the server.
+   Only if you run the optional push server, also add `OCCASIONS_SERVER_HOST` and `OCCASIONS_API_KEY`. Without them the build uses on-device scheduling.
 
 Then run the workflow. Processing in App Store Connect takes a few minutes after the upload finishes. In App Store Connect > your app > TestFlight, add testers by Apple ID email under Internal Testing (people on your team) or External Testing (anyone, but the first build of each version needs a short Beta App Review).
 

@@ -146,6 +146,44 @@ private func contact(
     }
 }
 
+@Suite struct LiveActivityPlannerTests {
+    private func bday(_ id: String, _ name: String, _ m: Int, _ d: Int) -> Occasion {
+        Occasion(kind: .birthday, people: [contact(id, name).person], date: MonthDay(month: m, day: d))
+    }
+
+    @Test func schedulesSoonestFewAtSendHour() {
+        let os = [bday("a", "Ana", 12, 1), bday("b", "Ben", 11, 6), bday("c", "Cy", 11, 20),
+                  bday("d", "Di", 11, 9), bday("e", "Ed", 3, 1)]
+        let plan = LiveActivityPlanner.plan(occasions: os, sendHour: 9, now: date(2026, 11, 5), calendar: gregorian)
+        #expect(plan.count == 3)
+        #expect(plan.map(\.key) == ["2026-11-06T9", "2026-11-09T9", "2026-11-20T9"])
+        #expect(gregorian.component(.hour, from: plan[0].start) == 9)
+    }
+
+    @Test func skipsTodayOnceSendHourPassedAndBeyondWindow() {
+        let os = [bday("a", "Ana", 11, 5), bday("b", "Ben", 12, 20)]
+        let plan = LiveActivityPlanner.plan(occasions: os, sendHour: 9, now: date(2026, 11, 5, hour: 10), calendar: gregorian)
+        #expect(plan.isEmpty)
+    }
+
+    @Test func keepsTodayBeforeSendHour() {
+        let plan = LiveActivityPlanner.plan(occasions: [bday("a", "Ana", 11, 5)], sendHour: 9,
+                                            now: date(2026, 11, 5, hour: 7), calendar: gregorian)
+        #expect(plan.map(\.key) == ["2026-11-05T9"])
+    }
+
+    @Test func coveredOccasionGetsNoDayOfNotification() {
+        let o = bday("a", "Priya", 11, 10)
+        var settings = Settings()
+        settings.leadDays = 3
+        let items = NotificationPlanner.plan(occasions: [o], settings: settings, includeDayOf: true,
+                                             dayOfCoveredByLiveActivity: [o.id],
+                                             now: date(2026, 11, 4), calendar: gregorian)
+        #expect(items.count == 1)
+        #expect(items[0].fireComponents.day == 7)
+    }
+}
+
 @Suite struct BirthdayTitleParserTests {
     @Test(arguments: [
         ("Priya's Birthday", "Priya"),

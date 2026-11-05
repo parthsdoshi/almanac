@@ -47,7 +47,9 @@ struct SettingsView: View {
                 .listRowBackground(Theme.Colors.card)
 
                 Section {
-                    LabeledContent("Server", value: model.server.hostDescription)
+                    if model.server.isConfigured {
+                        LabeledContent("Server", value: model.server.hostDescription)
+                    }
                     if let synced = model.store.state.lastSyncedAt {
                         LabeledContent("Last sync", value: synced.formatted(date: .abbreviated, time: .shortened))
                     }
@@ -64,7 +66,9 @@ struct SettingsView: View {
                 } footer: {
                     Text(model.server.isConfigured
                          ? "The server starts the Live Activity at your reminder time, even if the app isn't open. It only has first names and dates."
-                         : "No push server is set up, so the Live Activity starts when you open the app on the day.")
+                         : LiveActivityManager.canSchedule
+                            ? "Your phone schedules the next few Live Activities for your reminder time. Opening the app now and then keeps them topped up; anything not scheduled gets a notification instead."
+                            : "The Live Activity starts when you open the app on the day. On iOS 26 or later it starts by itself at your reminder time.")
                 }
                 .listRowBackground(Theme.Colors.card)
             }
