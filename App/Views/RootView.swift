@@ -21,10 +21,12 @@ struct RootView: View {
                         .tabItem { Label("Settings", systemImage: "gearshape") }
                         .tag(AppModel.Tab.settings)
                 }
+                .overlay { ConfettiBurst(trigger: model.celebrations).ignoresSafeArea() }
             } else {
                 OnboardingView()
             }
         }
+        .tint(Theme.Colors.accent)
         .sheet(item: $model.composeRequest) { request in
             MessageComposeView(request: request) { result in
                 model.didFinishCompose(request, result: result)

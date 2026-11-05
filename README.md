@@ -26,13 +26,15 @@ App/                   The iOS app
   DesignSystem/        Reusable components  <- design pass
 Shared/                Compiled into the app and the widget
   DesignSystem/Theme.swift   Colors, type, spacing, icons  <- design pass
+  DesignSystem/Almanac.swift Date chip and confetti, also used by the Live Activity
+  Fonts/                     Display font (Fraunces, OFL)
   OccasionAttributes.swift   Live Activity data (a contract with the server)
   MuteOccasionIntent.swift   The Mute button
 Widget/                Live Activity: Lock Screen + Dynamic Island  <- design pass
 Tests/                 Swift Testing unit tests for the date, stats, parsing and merge logic
 server/                Node push server (no dependencies)
 render.yaml            Render Blueprint for the server
-.github/workflows/     TestFlight upload (run by hand)
+.github/workflows/     TestFlight upload (run by hand), build check on pull requests
 ci/                    Export settings for that workflow
 ```
 
@@ -127,15 +129,18 @@ For each occasion: an opaque id (a hash), birthday or anniversary, first names, 
 
 Builds run from Xcode get sandbox push tokens; TestFlight and App Store builds get production ones. The app reports its best guess, and if Apple rejects the token as `BadDeviceToken`, the server retries the other environment and remembers whichever worked.
 
-## Design pass with Claude Design
+## Design: the almanac look
 
-All visual decisions sit in three places:
+A paper birthday almanac: cream paper by day and warm ink by night (it follows the phone's light/dark setting), a chunky soft serif for names and numbers, tear-off calendar dates, a big day countdown per person, and confetti on the day and when you text or call someone. Reduce Motion turns the confetti burst off.
 
-- `Shared/DesignSystem/Theme.swift`: colors, type, spacing, corner radii, icons. Used by the app and the Live Activity.
-- `App/DesignSystem/Components.swift`: `OccasionRow`, `KindBadge`, `ActionButton`, `StatTile`, `StatusDot`.
+All visual decisions sit in these places:
+
+- `Shared/DesignSystem/Theme.swift`: every color (light and dark), type, spacing, radii, icons. The single source of tokens.
+- `Shared/DesignSystem/Almanac.swift`: `DateChip` (the tear-off date) and `ConfettiField`, shared with the Live Activity.
+- `App/DesignSystem/Components.swift`: `OccasionRow`, `TodayCard`, `Countdown`, `SectionTitle`, `ActionButton`, `StatTile`, `StatusDot`, `LedgerRow`, `ConfettiBurst`.
+- `App/DesignSystem/Appearance.swift`: navigation and tab bar fonts and colors.
 - `Widget/OccasionLiveActivity.swift`: Lock Screen and Dynamic Island layouts.
-
-Screens to design: Onboarding, Upcoming (Today / This week / This month / Later), Occasion detail, Stats, Suggestions, Settings, and the Live Activity on the Lock Screen and in the Dynamic Island (compact, minimal, expanded). Do the design in Claude Design, then hand it to Claude Code pointing at those three files. `App/Views` should only need layout changes.
+- `Shared/Fonts`: the display font, cut from [Fraunces](https://github.com/undercasetype/Fraunces) (SIL Open Font License, see `OFL-Fraunces.txt`) into three static styles named "Almanac Display". If it fails to load, text falls back to the system serif.
 
 ## Known limits
 

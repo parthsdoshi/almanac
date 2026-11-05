@@ -7,6 +7,10 @@ struct OccasionsApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var model = AppModel.shared
 
+    init() {
+        Appearance.apply()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

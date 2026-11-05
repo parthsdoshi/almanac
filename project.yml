@@ -36,6 +36,10 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSSupportsLiveActivities: true
+        UIAppFonts:              # Shared/Fonts, bundled into the app and the widget
+          - AlmanacDisplay-Black.ttf
+          - AlmanacDisplay-Bold.ttf
+          - AlmanacDisplay-SemiBoldItalic.ttf
         ITSAppUsesNonExemptEncryption: false   # HTTPS only, so TestFlight skips the export compliance question
         NSContactsUsageDescription: Occasions reads birthdays and anniversaries from your contacts, and saves birthdays you choose to add from your calendar.
         NSCalendarsFullAccessUsageDescription: Occasions looks through your calendar for birthday events that aren't in your contacts yet.
@@ -67,6 +71,10 @@ targets:
         CFBundleDisplayName: Occasions
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UIAppFonts:              # Shared/Fonts, bundled into the app and the widget
+          - AlmanacDisplay-Black.ttf
+          - AlmanacDisplay-Bold.ttf
+          - AlmanacDisplay-SemiBoldItalic.ttf
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

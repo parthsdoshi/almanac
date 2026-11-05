@@ -53,6 +53,8 @@ final class AppModel {
     var composeRequest: ComposeRequest?
     var callChoice: CallChoice?
     var alertMessage: String?
+    /// Goes up each time you text or call someone from the app. The confetti burst watches it.
+    private(set) var celebrations = 0
 
     // Data
     private(set) var contactsAccess = ContactsService.currentAccess()
@@ -376,6 +378,7 @@ final class AppModel {
             guard !s.actions.contains(where: { $0.occasionID == occasionID && $0.instanceDay == day && $0.kind == kind }) else { return }
             s.actions.append(ActionRecord(occasionID: occasionID, instanceDay: day, kind: kind, at: .now))
         }
+        celebrations += 1
         Task { await liveActivities.end(occasionID: occasionID) }
     }
 
