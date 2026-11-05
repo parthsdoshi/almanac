@@ -63,11 +63,11 @@ enum OccasionBuilder {
                 let o = Occasion(kind: .birthday, people: [c.person], date: birthday)
                 byID[o.id] = o
             }
-            for (index, anniversary) in c.anniversaries.enumerated() {
+            for (n, anniversary) in c.anniversaries.enumerated() {
                 var people = [c]
                 if let partner = index.partner(of: c) { people.append(partner) }
                 people.sort { ($0.givenName, $0.id) < ($1.givenName, $1.id) }
-                let o = Occasion(kind: .anniversary, people: people.map(\.person), date: anniversary, discriminator: index)
+                let o = Occasion(kind: .anniversary, people: people.map(\.person), date: anniversary, discriminator: n)
                 // Same couple from the other card: keep whichever copy knows the year.
                 if let existing = byID[o.id], existing.date.year != nil || anniversary.year == nil { continue }
                 byID[o.id] = o
