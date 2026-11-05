@@ -1,0 +1,8 @@
+*.xcodeproj/
+xcuserdata/
+DerivedData/
+.DS_Store
+Config/Secrets.xcconfig
+*.p8
+server/node_modules/
+server/data/

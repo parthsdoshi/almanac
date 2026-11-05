@@ -1,0 +1,9 @@
+// Shared build settings. Don't put your own values here:
+// copy Secrets.example.xcconfig to Secrets.xcconfig (gitignored) and fill that in.
+APP_BUNDLE_ID = com.example.occasions
+DEVELOPMENT_TEAM =
+// Host only, no scheme. xcconfig treats "//" as a comment, so "https://" can't go here.
+OCCASIONS_SERVER_HOST =
+OCCASIONS_API_KEY =
+
+#include? "Secrets.xcconfig"

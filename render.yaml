@@ -1,0 +1,37 @@
+# Render Blueprint for the Occasions push server.
+# One always-on web service ($7/month) with a 1 GB disk ($0.25/month).
+# It takes the app's uploads and, every 5 minutes, push-starts any Live
+# Activity that's due at your local send hour.
+services:
+  - type: web
+    name: occasions-push
+    runtime: node
+    plan: starter
+    region: virginia
+    rootDir: server
+    buildCommand: npm install --omit=dev
+    startCommand: node src/index.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: occasions-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /var/data
+      # Render generates this. Copy it into Config/Secrets.xcconfig as OCCASIONS_API_KEY.
+      - key: API_KEY
+        generateValue: true
+      # From developer.apple.com > Keys. You'll be asked for these when the Blueprint is created.
+      - key: APNS_KEY_ID
+        sync: false
+      - key: APNS_TEAM_ID
+        sync: false
+      # Must equal APP_BUNDLE_ID in Config/Secrets.xcconfig.
+      - key: APNS_BUNDLE_ID
+        sync: false
+      # The .p8 key itself goes in as a Secret File named AuthKey.p8
+      # (Environment > Secret Files), which lands at /etc/secrets/AuthKey.p8.

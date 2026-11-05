@@ -1,0 +1,12 @@
+{
+  "name": "occasions-push",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Starts the Occasions app's day-of Live Activities with APNs push-to-start.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  }
+}

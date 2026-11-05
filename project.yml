@@ -1,0 +1,84 @@
+# XcodeGen spec. Run `xcodegen generate` to produce Occasions.xcodeproj.
+# The .xcodeproj is generated, so it's gitignored: edit this file instead.
+name: Occasions
+options:
+  deploymentTarget:
+    iOS: "17.2"            # push-to-start Live Activities need 17.2+
+  createIntermediateGroups: true
+  developmentLanguage: en
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"   # iPhone only
+targets:
+  Occasions:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    entitlements:
+      path: App/Occasions.entitlements
+      properties:
+        aps-environment: development
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Occasions
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSSupportsLiveActivities: true
+        NSContactsUsageDescription: Occasions reads birthdays and anniversaries from your contacts, and saves birthdays you choose to add from your calendar.
+        NSCalendarsFullAccessUsageDescription: Occasions looks through your calendar for birthday events that aren't in your contacts yet.
+        UIBackgroundModes: [fetch]
+        BGTaskSchedulerPermittedIdentifiers: [occasions.refresh]
+        CFBundleURLTypes:
+          - CFBundleURLName: occasions
+            CFBundleURLSchemes: [occasions]
+        OccasionsServerHost: $(OCCASIONS_SERVER_HOST)
+        OccasionsAPIKey: $(OCCASIONS_API_KEY)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID)
+        PRODUCT_MODULE_NAME: Occasions
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+    dependencies:
+      - target: OccasionsWidget
+    scheme:
+      testTargets: [OccasionsTests]
+  OccasionsWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widget
+      - Shared
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: Occasions
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).widget
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) WIDGET_EXTENSION
+  OccasionsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: Occasions
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).tests
+        GENERATE_INFOPLIST_FILE: YES
