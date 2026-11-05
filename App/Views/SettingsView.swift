@@ -17,7 +17,9 @@ struct SettingsView: View {
                         }
                     }
                     Toggle("Include anniversaries", isOn: binding(\.includeAnniversaries))
+                        .tint(Theme.Colors.acted)
                 }
+                .listRowBackground(Theme.Colors.card)
 
                 Section {
                     TextField("Birthday", text: binding(\.birthdayTemplate), axis: .vertical)
@@ -27,11 +29,12 @@ struct SettingsView: View {
                 } footer: {
                     Text("{name} is their first name. {names} is both names for a couple.")
                 }
+                .listRowBackground(Theme.Colors.card)
 
                 Section("Muted") {
                     let muted = model.store.state.muted.sorted { $0.value < $1.value }
                     if muted.isEmpty {
-                        Text("Nothing muted").foregroundStyle(.secondary)
+                        Text("Nothing muted").foregroundStyle(Theme.Colors.inkSoft)
                     }
                     ForEach(muted, id: \.key) { entry in
                         HStack {
@@ -41,6 +44,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                .listRowBackground(Theme.Colors.card)
 
                 Section {
                     LabeledContent("Server", value: model.server.hostDescription)
@@ -48,7 +52,7 @@ struct SettingsView: View {
                         LabeledContent("Last sync", value: synced.formatted(date: .abbreviated, time: .shortened))
                     }
                     if let status = model.serverStatus {
-                        Text(status).foregroundStyle(.orange)
+                        Text(status).foregroundStyle(Theme.Colors.missed)
                     }
                     if model.server.isConfigured {
                         Button("Sync now") { Task { await model.syncServer(force: true) } }
@@ -62,7 +66,10 @@ struct SettingsView: View {
                          ? "The server starts the Live Activity at your reminder time, even if the app isn't open. It only has first names and dates."
                          : "No push server is set up, so the Live Activity starts when you open the app on the day.")
                 }
+                .listRowBackground(Theme.Colors.card)
             }
+            .listRowSeparatorTint(Theme.Colors.rule)
+            .paperBackground()
             .navigationTitle("Settings")
         }
     }

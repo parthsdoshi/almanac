@@ -12,16 +12,42 @@ struct UpcomingView: View {
         @Bindable var model = model
         NavigationStack(path: $model.upcomingPath) {
             List {
+                Section {
+                    Eyebrow(text: Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()).replacingOccurrences(of: ",", with: " ·"))
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: Theme.Spacing.xs, bottom: 0, trailing: 0))
+                }
+
                 ForEach(sections) { section in
-                    Section(section.id) {
-                        ForEach(section.items) { item in
-                            NavigationLink(value: item.occasion.id) {
-                                OccasionRow(item: item)
+                    if section.id == "Today" {
+                        Section {
+                            ForEach(section.items) { item in
+                                TodayCard(
+                                    item: item,
+                                    onOpen: { model.upcomingPath.append(item.occasion.id) },
+                                    onMessage: { model.beginMessage(item.occasion) },
+                                    onCall: { model.beginCall(item.occasion) })
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: Theme.Spacing.xs, leading: 0, bottom: Theme.Spacing.xs, trailing: 0))
                             }
+                        }
+                    } else {
+                        Section {
+                            ForEach(section.items) { item in
+                                NavigationLink(value: item.occasion.id) {
+                                    OccasionRow(item: item)
+                                }
+                            }
+                            .listRowBackground(Theme.Colors.card)
+                        } header: {
+                            SectionTitle(title: section.id)
                         }
                     }
                 }
             }
+            .listSectionSpacing(.compact)
+            .listRowSeparatorTint(Theme.Colors.rule)
+            .paperBackground()
             .overlay {
                 if model.upcoming.isEmpty {
                     ContentUnavailableView(
@@ -29,6 +55,7 @@ struct UpcomingView: View {
                         systemImage: "gift",
                         description: Text("Add birthdays to your contacts, or check Suggestions for ones in your calendar.")
                     )
+                    .foregroundStyle(Theme.Colors.inkSoft)
                 }
             }
             .navigationTitle("Upcoming")
