@@ -5,7 +5,7 @@ name: Build
 
 on:
   push:
-    branches: [main]
+    branches: [main, no-server]   # drop no-server when it merges
   pull_request:
   workflow_dispatch:
 
