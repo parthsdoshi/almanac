@@ -5,6 +5,7 @@ struct OccasionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let occasionID: String
     @State private var confirmingMute = false
+    @State private var openContactID: String?
 
     var body: some View {
         if let item = model.upcoming.first(where: { $0.id == occasionID }) {
@@ -67,6 +68,8 @@ struct OccasionDetailView: View {
                     .paperCard()
                 }
 
+                sourcesCard(item)
+
                 ActionButton(title: "Mute forever", systemImage: Theme.Icons.mute, style: .destructive) {
                     confirmingMute = true
                 }
@@ -83,6 +86,24 @@ struct OccasionDetailView: View {
             .ignoresSafeArea()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    model.toggleStar(o.id)
+                } label: {
+                    Image(systemName: item.starred ? "star.fill" : "star")
+                        .foregroundStyle(item.starred ? Theme.Colors.gold : Theme.Colors.inkSoft)
+                }
+                .accessibilityLabel(item.starred ? "Unstar" : "Star for a gift reminder")
+            }
+        }
+        .sheet(item: Binding(
+            get: { openContactID.map(ContactSheetID.init) },
+            set: { openContactID = $0?.id }
+        )) { sheet in
+            ContactCardSheet(contactID: sheet.id) { openContactID = nil }
+                .ignoresSafeArea()
+        }
         .confirmationDialog("Mute \(o.title)?", isPresented: $confirmingMute, titleVisibility: .visible) {
             Button("Mute forever", role: .destructive) {
                 Task { await model.mute(occasionID: o.id) }
@@ -90,6 +111,54 @@ struct OccasionDetailView: View {
         } message: {
             Text("No more reminders or Live Activities for this. You can unmute it in Settings.")
         }
+    }
+}
+
+private struct ContactSheetID: Identifiable { let id: String }
+
+extension OccasionDetailView {
+    /// Which contact card each person comes from, with a way to open it.
+    /// This is how you track down duplicates.
+    @ViewBuilder
+    fileprivate func sourcesCard(_ item: UpcomingItem) -> some View {
+        let o = item.occasion
+        VStack(alignment: .leading, spacing: Theme.Spacing.m) {
+            Text("From your contacts")
+                .font(Theme.Typography.display(20, .bold, relativeTo: .title3))
+                .foregroundStyle(Theme.Colors.ink)
+            if item.possibleDuplicate {
+                Text("Another entry has the same name and date. That's usually two cards for the same person that aren't linked. Open the card to link or delete one.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.Colors.missed)
+            }
+            ForEach(Array(o.people.enumerated()), id: \.offset) { i, person in
+                Button {
+                    openContactID = person.contactID
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(person.fullName)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Theme.Colors.ink)
+                            Text("In \(i < item.sources.count ? item.sources[i] : "your contacts")")
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.Colors.inkSoft)
+                        }
+                        Spacer()
+                        Text("Open card")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.Colors.accent)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.Colors.inkSoft)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Theme.Spacing.l)
+        .paperCard()
     }
 }
 

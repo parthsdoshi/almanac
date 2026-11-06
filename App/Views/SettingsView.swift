@@ -6,6 +6,9 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    ScreenHeader(title: "Settings").screenHeaderRow()
+                }
                 Section("Reminders") {
                     Stepper(value: binding(\.leadDays), in: 0...30) {
                         Text(model.settings.leadDays == 0 ? "No heads-up" : "Heads-up \(model.settings.leadDays) day\(model.settings.leadDays == 1 ? "" : "s") before")
@@ -18,6 +21,17 @@ struct SettingsView: View {
                     }
                     Toggle("Include anniversaries", isOn: binding(\.includeAnniversaries))
                         .tint(Theme.Colors.acted)
+                }
+                .listRowBackground(Theme.Colors.card)
+
+                Section {
+                    Stepper(value: binding(\.giftLeadDays), in: 0...60) {
+                        Text(model.settings.giftLeadDays == 0 ? "No gift reminder" : "Gift reminder \(model.settings.giftLeadDays) day\(model.settings.giftLeadDays == 1 ? "" : "s") before")
+                    }
+                } header: {
+                    Text("Starred people")
+                } footer: {
+                    Text("Star someone from their page to get a nudge to buy a gift, on top of the usual heads-up.")
                 }
                 .listRowBackground(Theme.Colors.card)
 
@@ -71,10 +85,15 @@ struct SettingsView: View {
                             : "The Live Activity starts when you open the app on the day. On iOS 26 or later it starts by itself at your reminder time.")
                 }
                 .listRowBackground(Theme.Colors.card)
+
+                Section {
+                    Button("Show the tour again") { model.showTutorial = true }
+                }
+                .listRowBackground(Theme.Colors.card)
             }
             .listRowSeparatorTint(Theme.Colors.rule)
             .paperBackground()
-            .navigationTitle("Settings")
+            .tabScreen("Settings")
         }
     }
 

@@ -27,6 +27,12 @@ struct RootView: View {
             }
         }
         .tint(Theme.Colors.accent)
+        .fullScreenCover(isPresented: Binding(
+            get: { model.tutorialPresented },
+            set: { if !$0 { model.finishTutorial() } }
+        )) {
+            TutorialView { model.finishTutorial() }
+        }
         .sheet(item: $model.composeRequest) { request in
             MessageComposeView(request: request) { result in
                 model.didFinishCompose(request, result: result)
@@ -45,7 +51,7 @@ struct RootView: View {
             }
         }
         .alert(
-            "Almanac",
+            "Shebang#!",
             isPresented: Binding(get: { model.alertMessage != nil }, set: { if !$0 { model.alertMessage = nil } })
         ) {
             Button("OK", role: .cancel) {}

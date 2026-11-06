@@ -8,6 +8,9 @@ struct StatsView: View {
         NavigationStack {
             List {
                 Section {
+                    ScreenHeader(title: "Stats").screenHeaderRow()
+                }
+                Section {
                     VStack(spacing: Theme.Spacing.m) {
                         if let rate = stats.actedRate {
                             RateCard(rate: rate)
@@ -49,7 +52,7 @@ struct StatsView: View {
             }
             .listRowSeparatorTint(Theme.Colors.rule)
             .paperBackground()
-            .navigationTitle("Stats")
+            .tabScreen("Stats")
         }
     }
 

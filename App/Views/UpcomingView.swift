@@ -13,9 +13,10 @@ struct UpcomingView: View {
         NavigationStack(path: $model.upcomingPath) {
             List {
                 Section {
-                    Eyebrow(text: Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()).replacingOccurrences(of: ",", with: " ·"))
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: Theme.Spacing.xs, bottom: 0, trailing: 0))
+                    ScreenHeader(
+                        title: "Upcoming",
+                        eyebrow: Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()).replacingOccurrences(of: ",", with: " ·"))
+                        .screenHeaderRow()
                 }
 
                 ForEach(sections) { section in
@@ -58,7 +59,7 @@ struct UpcomingView: View {
                     .foregroundStyle(Theme.Colors.inkSoft)
                 }
             }
-            .navigationTitle("Upcoming")
+            .tabScreen("Upcoming")
             .navigationDestination(for: String.self) { id in
                 OccasionDetailView(occasionID: id)
             }

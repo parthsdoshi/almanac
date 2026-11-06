@@ -21,6 +21,7 @@ enum NotificationPlanner {
         settings: Settings,
         includeDayOf: Bool,
         dayOfCoveredByLiveActivity: Set<String> = [],
+        starred: Set<String> = [],
         now: Date,
         calendar: Calendar
     ) -> [Item] {
@@ -34,6 +35,12 @@ enum NotificationPlanner {
                 let when = settings.leadDays == 1 ? "tomorrow" : "in \(settings.leadDays) days"
                 add(&items, o, kind: "lead", day: lead, hour: settings.sendHour, now: now, calendar: calendar,
                     title: "\(o.title) is \(when)", body: "\(dateText). Tap to plan a message.")
+            }
+            if starred.contains(o.id), settings.giftLeadDays > 0,
+               let gift = calendar.date(byAdding: .day, value: -settings.giftLeadDays, to: next) {
+                let who = Names.join(o.firstNames)
+                add(&items, o, kind: "gift", day: gift, hour: settings.sendHour, now: now, calendar: calendar,
+                    title: "Gift for \(who)?", body: "\(o.title) is \(dateText). Still time to order something.")
             }
             // A scheduled Live Activity alerts when it starts, so skip the duplicate.
             if includeDayOf, !dayOfCoveredByLiveActivity.contains(o.id) {

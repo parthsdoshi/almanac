@@ -1,4 +1,5 @@
 import BackgroundTasks
+import EventKit
 import Foundation
 import WidgetKit
 import MessageUI
@@ -39,6 +40,12 @@ struct UpcomingItem: Identifiable, Hashable {
     let daysUntil: Int
     /// Age they turn / years married, when the year is known.
     let years: Int?
+    /// Account each person's card is in ("iCloud", "Gmail"), same order as people.
+    var sources: [String] = []
+    /// Another entry has the same kind, date and names: usually two contact cards
+    /// for the same person that aren't linked.
+    var possibleDuplicate = false
+    var starred = false
 }
 
 @MainActor
@@ -54,6 +61,8 @@ final class AppModel {
     var composeRequest: ComposeRequest?
     var callChoice: CallChoice?
     var alertMessage: String?
+    /// Set from Settings to replay the tour.
+    var showTutorial = false
     /// Goes up each time you text or call someone from the app. The confetti burst watches it.
     private(set) var celebrations = 0
 
@@ -63,6 +72,8 @@ final class AppModel {
     private(set) var suggestions: [BirthdaySuggestion] = []
     private(set) var hasScannedCalendar = false
     private(set) var serverStatus: String?
+    /// Contact card id -> account name, for explaining duplicates.
+    private(set) var contactSources: [String: String] = [:]
 
     let store = StateStore.shared
     @ObservationIgnored private let contacts = ContactsService()
@@ -84,13 +95,20 @@ final class AppModel {
 
     var upcoming: [UpcomingItem] {
         let now = Date()
-        return activeOccasions.map { o in
+        let active = activeOccasions
+        var counts: [String: Int] = [:]
+        for o in active { counts[Self.duplicateKey(o), default: 0] += 1 }
+        let starred = store.state.starred
+        return active.map { o in
             let next = Recurrence.next(o.date, onOrAfter: now, calendar: calendar)
             return UpcomingItem(
                 occasion: o,
                 nextDate: next,
                 daysUntil: Recurrence.daysUntil(next, from: now, calendar: calendar),
-                years: Recurrence.yearsSince(o.date, atYear: calendar.component(.year, from: next))
+                years: Recurrence.yearsSince(o.date, atYear: calendar.component(.year, from: next)),
+                sources: o.people.map { source(for: $0.contactID) },
+                possibleDuplicate: (counts[Self.duplicateKey(o)] ?? 0) > 1,
+                starred: starred.contains(o.id)
             )
         }
         .sorted { ($0.daysUntil, $0.occasion.title) < ($1.daysUntil, $1.occasion.title) }
@@ -105,6 +123,41 @@ final class AppModel {
             today: .now,
             calendar: calendar
         )
+    }
+
+    private static func duplicateKey(_ o: Occasion) -> String {
+        let names = o.people.map { NameIndex.normalize($0.fullName) }.sorted().joined(separator: "+")
+        return "\(o.kind.rawValue)|\(o.date.month)-\(o.date.day)|\(names)"
+    }
+
+    /// Which account a contact card is in, or "a linked card" when iOS merged it from several.
+    func source(for contactID: String) -> String {
+        contactSources[contactID] ?? "a linked card"
+    }
+
+    // MARK: Tutorial
+
+    /// First run (after Contacts access), or replayed from Settings.
+    var tutorialPresented: Bool {
+        showTutorial || (contactsAccess.canRead && !store.state.seenTutorial)
+    }
+
+    func finishTutorial() {
+        showTutorial = false
+        if !store.state.seenTutorial { store.update { $0.seenTutorial = true } }
+    }
+
+    // MARK: Stars
+
+    func isStarred(_ occasionID: String) -> Bool {
+        store.state.starred.contains(occasionID)
+    }
+
+    func toggleStar(_ occasionID: String) {
+        store.update { s in
+            if s.starred.contains(occasionID) { s.starred.remove(occasionID) } else { s.starred.insert(occasionID) }
+        }
+        Task { await refreshSchedules() }
     }
 
     func occasion(id: String) -> Occasion? {
@@ -145,9 +198,12 @@ final class AppModel {
         contactsAccess = ContactsService.currentAccess()
         guard contactsAccess.canRead else { return }
         do {
-            snapshots = try await Task.detached(priority: .userInitiated) {
-                try ContactsService().fetchSnapshots()
+            let (fetched, sources) = try await Task.detached(priority: .userInitiated) {
+                let service = ContactsService()
+                return (try service.fetchSnapshots(), service.fetchSources())
             }.value
+            snapshots = fetched
+            contactSources = sources
             var built = OccasionBuilder.build(from: snapshots)
             if !settings.includeAnniversaries { built.removeAll { $0.kind == .anniversary } }
             occasions = built
@@ -171,6 +227,7 @@ final class AppModel {
             settings: settings,
             includeDayOf: !server.isConfigured,  // the server's Live Activity alert covers day-of
             dayOfCoveredByLiveActivity: coveredByLiveActivity,
+            starred: store.state.starred,
             now: .now,
             calendar: calendar
         )
@@ -483,6 +540,21 @@ final class AppModel {
         } catch {
             alertMessage = "Couldn't save to Contacts: \(error.localizedDescription)"
         }
+    }
+
+    /// Every contact the app read, for pointing a suggestion at someone else.
+    var contactChoices: [ContactSnapshot] { snapshots }
+
+    func calendarEvent(id: String) -> EKEvent? {
+        calendarScanner.event(id: id)
+    }
+
+    /// Points a suggestion at a contact you picked.
+    func relink(_ s: BirthdaySuggestion, to contact: ContactSnapshot) {
+        guard let i = suggestions.firstIndex(where: { $0.id == s.id }) else { return }
+        suggestions[i].contactID = contact.id
+        suggestions[i].contactName = ContactChooser.name(contact)
+        suggestions[i].existingBirthday = contact.birthday
     }
 
     func dismiss(_ s: BirthdaySuggestion) {

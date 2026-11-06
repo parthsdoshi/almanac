@@ -144,6 +144,21 @@ private func contact(
                                              now: date(2026, 11, 4), calendar: gregorian)
         #expect(items.isEmpty)
     }
+
+    @Test func starredGetsAGiftReminder() {
+        let o = Occasion(kind: .birthday, people: [contact("a", "Priya").person], date: MonthDay(month: 12, day: 1))
+        var settings = Settings()
+        settings.leadDays = 3
+        settings.giftLeadDays = 14
+        let plain = NotificationPlanner.plan(occasions: [o], settings: settings, includeDayOf: false,
+                                             now: date(2026, 11, 4), calendar: gregorian)
+        let starred = NotificationPlanner.plan(occasions: [o], settings: settings, includeDayOf: false,
+                                               starred: [o.id], now: date(2026, 11, 4), calendar: gregorian)
+        #expect(plain.count == 1)
+        #expect(starred.count == 2)
+        #expect(starred[0].fireComponents.day == 17)
+        #expect(starred[0].title == "Gift for Priya?")
+    }
 }
 
 @Suite struct LiveActivityPlannerTests {

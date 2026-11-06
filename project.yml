@@ -30,7 +30,7 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: Almanac
+        CFBundleDisplayName: "Shebang#!"
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
@@ -42,8 +42,8 @@ targets:
           - AlmanacDisplay-Bold.ttf
           - AlmanacDisplay-SemiBoldItalic.ttf
         ITSAppUsesNonExemptEncryption: false   # HTTPS only, so TestFlight skips the export compliance question
-        NSContactsUsageDescription: Almanac reads birthdays and anniversaries from your contacts, and saves birthdays you choose to add from your calendar.
-        NSCalendarsFullAccessUsageDescription: Almanac looks through your calendar for birthday events that aren't in your contacts yet.
+        NSContactsUsageDescription: "Shebang#! reads birthdays and anniversaries from your contacts, and saves birthdays you choose to add from your calendar."
+        NSCalendarsFullAccessUsageDescription: "Shebang#! looks through your calendar for birthday events that aren't in your contacts yet."
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [occasions.refresh]
         CFBundleURLTypes:
@@ -74,7 +74,7 @@ targets:
     info:
       path: Widget/Info.plist
       properties:
-        CFBundleDisplayName: Almanac
+        CFBundleDisplayName: "Shebang#!"
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)

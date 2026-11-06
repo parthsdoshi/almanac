@@ -108,6 +108,38 @@ struct ContactsService {
         return result
     }
 
+    /// Which account each contact card lives in ("iCloud", "Gmail", "On My iPhone"),
+    /// keyed by card id. Linked cards are listed separately; a unified contact's id
+    /// is usually one of them. Blocking. Call off the main actor.
+    func fetchSources() -> [String: String] {
+        guard let containers = try? store.containers(matching: nil) else { return [:] }
+        var result: [String: String] = [:]
+        for container in containers {
+            let label = Self.label(for: container)
+            let request = CNContactFetchRequest(keysToFetch: [CNContactIdentifierKey as CNKeyDescriptor])
+            request.predicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
+            request.unifyResults = false
+            try? store.enumerateContacts(with: request) { contact, _ in
+                result[contact.identifier] = label
+            }
+        }
+        return result
+    }
+
+    private static func label(for container: CNContainer) -> String {
+        switch container.name {
+        case "Card", "iCloud": return "iCloud"
+        case "": break
+        default: return container.name
+        }
+        switch container.type {
+        case .local: return "On My iPhone"
+        case .exchange: return "Exchange"
+        case .cardDAV: return "an online account"
+        default: return "Contacts"
+        }
+    }
+
     /// Adds a year-less birthday to an existing contact.
     func setBirthday(_ date: MonthDay, contactID: String) throws {
         let contact = try store.unifiedContact(

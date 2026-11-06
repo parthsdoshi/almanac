@@ -3,10 +3,26 @@ import SwiftUI
 struct SuggestionsView: View {
     @Environment(AppModel.self) private var model
     @State private var scanning = false
+    @State private var sheet: SuggestionSheet?
+    @State private var confirmReplace: BirthdaySuggestion?
+
+    private enum SuggestionSheet: Identifiable {
+        case event(String), contact(String), choose(BirthdaySuggestion)
+        var id: String {
+            switch self {
+            case .event(let id): "event-\(id)"
+            case .contact(let id): "contact-\(id)"
+            case .choose(let s): "choose-\(s.id)"
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    ScreenHeader(title: "Suggestions").screenHeaderRow()
+                }
                 if model.hasScannedCalendar && model.suggestions.isEmpty {
                     ContentUnavailableView(
                         "Nothing to add",
@@ -25,14 +41,32 @@ struct SuggestionsView: View {
                                         Text(s.name)
                                             .font(Theme.Typography.rowTitle)
                                             .foregroundStyle(Theme.Colors.ink)
-                                        Text("\(dateText(s.date)) · in your calendar")
+                                        Text("\(dateText(s.date)) · \(s.calendarTitle.map { "from \($0)" } ?? "in your calendar")")
                                             .font(Theme.Typography.rowSubtitle)
                                             .foregroundStyle(Theme.Colors.inkSoft)
                                     }
                                 }
+                                HStack(spacing: Theme.Spacing.l) {
+                                    if let eventID = s.eventID {
+                                        linkButton("Event", systemImage: "calendar") { sheet = .event(eventID) }
+                                    }
+                                    if let contactID = s.contactID {
+                                        linkButton(s.contactName ?? "Contact", systemImage: "person.crop.circle") { sheet = .contact(contactID) }
+                                    }
+                                    linkButton(s.contactID == nil ? "Pick contact" : "Change", systemImage: "arrow.triangle.swap") { sheet = .choose(s) }
+                                }
+                                if let existing = s.existingBirthday {
+                                    Text("\(s.contactName ?? "They") already has a birthday on \(dateText(existing)). Adding replaces it.")
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.Colors.missed)
+                                }
                                 HStack(spacing: 10) {
                                     Button(s.contactName.map { "Add to \($0)" } ?? "Create contact") {
-                                        Task { await model.accept(s) }
+                                        if s.existingBirthday != nil {
+                                            confirmReplace = s
+                                        } else {
+                                            Task { await model.accept(s) }
+                                        }
                                     }
                                     .buttonStyle(PillButtonStyle(fill: Theme.Colors.birthday, text: Theme.Colors.onBirthday))
                                     Button("Dismiss") { model.dismiss(s) }
@@ -71,9 +105,43 @@ struct SuggestionsView: View {
                     }
                 }
             }
-            .navigationTitle("Suggestions")
+            .tabScreen("Suggestions")
             .refreshable { await model.scanCalendar() }
+            .sheet(item: $sheet) { which in
+                switch which {
+                case .event(let id):
+                    CalendarEventSheet(event: model.calendarEvent(id: id)) { sheet = nil }
+                        .ignoresSafeArea()
+                case .contact(let id):
+                    ContactCardSheet(contactID: id) { sheet = nil }
+                        .ignoresSafeArea()
+                case .choose(let s):
+                    ContactChooser(contacts: model.contactChoices) { picked in
+                        model.relink(s, to: picked)
+                    }
+                }
+            }
+            .confirmationDialog(
+                "Replace \(confirmReplace?.contactName ?? "their") birthday?",
+                isPresented: Binding(get: { confirmReplace != nil }, set: { if !$0 { confirmReplace = nil } }),
+                titleVisibility: .visible,
+                presenting: confirmReplace
+            ) { s in
+                Button("Replace with \(dateText(s.date))", role: .destructive) {
+                    Task { await model.accept(s) }
+                }
+            }
         }
+    }
+
+    private func linkButton(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+        }
+        .buttonStyle(.borderless)
+        .tint(Theme.Colors.accent)
     }
 
     /// Only used to draw the month and day on the chip. 2000 is a leap year, so Feb 29 works.

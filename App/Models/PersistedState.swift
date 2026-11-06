@@ -8,6 +8,8 @@ struct Settings: Codable, Equatable, Sendable {
     var includeAnniversaries = true
     var birthdayTemplate = "Happy birthday, {name}!"
     var anniversaryTemplate = "Happy anniversary, {names}!"
+    /// For starred people: a "get a gift" reminder this many days ahead. 0 turns it off.
+    var giftLeadDays = 14
 
     init() {}
 
@@ -20,6 +22,7 @@ struct Settings: Codable, Equatable, Sendable {
         includeAnniversaries = try c.decodeIfPresent(Bool.self, forKey: .includeAnniversaries) ?? d.includeAnniversaries
         birthdayTemplate = try c.decodeIfPresent(String.self, forKey: .birthdayTemplate) ?? d.birthdayTemplate
         anniversaryTemplate = try c.decodeIfPresent(String.self, forKey: .anniversaryTemplate) ?? d.anniversaryTemplate
+        giftLeadDays = try c.decodeIfPresent(Int.self, forKey: .giftLeadDays) ?? d.giftLeadDays
     }
 }
 
@@ -42,6 +45,10 @@ struct PersistedState: Codable, Sendable {
     var startedActivityKeys: Set<String> = []
     /// occasionID -> LiveActivityPlanner key for Live Activities scheduled on iOS 26+.
     var scheduledActivities: [String: String] = [:]
+    /// Starred occasion ids: they get a gift reminder and a star in the list.
+    var starred: Set<String> = []
+    /// The first-run tutorial has been shown.
+    var seenTutorial = false
 
     init() {}
 
@@ -59,5 +66,7 @@ struct PersistedState: Codable, Sendable {
         dismissedSuggestions = try c.decodeIfPresent(Set<String>.self, forKey: .dismissedSuggestions) ?? []
         startedActivityKeys = try c.decodeIfPresent(Set<String>.self, forKey: .startedActivityKeys) ?? []
         scheduledActivities = try c.decodeIfPresent([String: String].self, forKey: .scheduledActivities) ?? [:]
+        starred = try c.decodeIfPresent(Set<String>.self, forKey: .starred) ?? []
+        seenTutorial = try c.decodeIfPresent(Bool.self, forKey: .seenTutorial) ?? false
     }
 }

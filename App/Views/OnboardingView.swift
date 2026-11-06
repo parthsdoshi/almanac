@@ -12,7 +12,7 @@ struct OnboardingView: View {
                 .font(Theme.Typography.display(44, .black, relativeTo: .largeTitle))
                 .foregroundStyle(Theme.Colors.ink)
                 .multilineTextAlignment(.center)
-            Text("Almanac reads birthdays and anniversaries from your contacts, reminds you ahead of time, and puts a message or call one tap away on the day.")
+            Text("Shebang#! reads birthdays and anniversaries from your contacts, reminds you ahead of time, and puts a message or call one tap away on the day.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.Colors.inkSoft)
             Spacer()

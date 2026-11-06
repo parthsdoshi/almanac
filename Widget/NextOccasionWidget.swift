@@ -94,7 +94,7 @@ struct NextOccasionView: View {
     // Empty states
 
     private var emptyText: String {
-        entry.hasSnapshot ? "No birthdays yet" : "Open Almanac to load birthdays"
+        entry.hasSnapshot ? "No birthdays yet" : "Open Shebang#! to load birthdays"
     }
 
     // Small: one big tear-off page.

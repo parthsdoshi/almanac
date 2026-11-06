@@ -30,6 +30,78 @@ struct Eyebrow: View {
     }
 }
 
+/// The big serif title at the top of a tab, as the first row of its list.
+/// Used with `.tabScreen(_:)`, which keeps the navigation bar slim and only
+/// shows the title there once this has scrolled away.
+struct ScreenHeader: View {
+    let title: String
+    var eyebrow: String? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let eyebrow { Eyebrow(text: eyebrow) }
+            Text(title)
+                .font(Theme.Typography.screenTitle)
+                .foregroundStyle(Theme.Colors.ink)
+                .accessibilityAddTraits(.isHeader)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+extension View {
+    /// A header row section for the top of a tab's List or Form.
+    @ViewBuilder
+    func screenHeaderRow() -> some View {
+        listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: Theme.Spacing.xs, bottom: 0, trailing: 0))
+    }
+
+    /// Slim navigation bar for a tab's root screen. The large title used to
+    /// leave a band of empty space above the list, so the title lives in the
+    /// list instead (ScreenHeader) and fades into the bar once scrolled past.
+    func tabScreen(_ title: String) -> some View {
+        modifier(TabScreenChrome(title: title))
+    }
+}
+
+private struct TabScreenChrome: ViewModifier {
+    let title: String
+    @State private var scrolled = false
+
+    func body(content: Content) -> some View {
+        content
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(Theme.Typography.display(18, .bold, relativeTo: .headline))
+                        .foregroundStyle(Theme.Colors.ink)
+                        .opacity(scrolled ? 1 : 0)
+                        .accessibilityHidden(!scrolled)
+                }
+            }
+            .modifier(ScrollPastHeader(scrolled: $scrolled))
+    }
+}
+
+private struct ScrollPastHeader: ViewModifier {
+    @Binding var scrolled: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.onScrollGeometryChange(for: Bool.self) { g in
+                g.contentOffset.y + g.contentInsets.top > 40
+            } action: { _, past in
+                withAnimation(.easeInOut(duration: 0.15)) { scrolled = past }
+            }
+        } else {
+            content.onAppear { scrolled = true }
+        }
+    }
+}
+
 /// Italic serif section title with a dotted rule running off to the right.
 struct SectionTitle: View {
     let title: String
@@ -98,12 +170,25 @@ struct OccasionRow: View {
         HStack(spacing: Theme.Spacing.m) {
             DateChip(date: item.nextDate, kind: item.occasion.kind)
             VStack(alignment: .leading, spacing: 3) {
-                Text(Names.join(item.occasion.firstNames))
-                    .font(Theme.Typography.rowTitle)
-                    .foregroundStyle(Theme.Colors.ink)
+                HStack(spacing: 5) {
+                    Text(Names.join(item.occasion.firstNames))
+                        .font(Theme.Typography.rowTitle)
+                        .foregroundStyle(Theme.Colors.ink)
+                    if item.starred {
+                        Image(systemName: "star.fill")
+                            .font(.caption)
+                            .foregroundStyle(Theme.Colors.gold)
+                            .accessibilityLabel("Starred")
+                    }
+                }
                 Text(OccasionText.subtitle(item))
                     .font(Theme.Typography.rowSubtitle)
                     .foregroundStyle(Theme.Colors.inkSoft)
+                if item.possibleDuplicate {
+                    Label("Duplicate? From \(OccasionText.sources(item))", systemImage: "square.on.square")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.Colors.missed)
+                }
             }
             Spacer(minLength: Theme.Spacing.s)
             Countdown(days: item.daysUntil)
@@ -118,6 +203,13 @@ enum OccasionText {
     static func subtitle(_ item: UpcomingItem) -> String {
         let day = item.nextDate.formatted(.dateTime.weekday(.wide))
         return "\(day) · \(detail(item))"
+    }
+
+    /// "iCloud", "iCloud and Gmail": the accounts the people's cards are in.
+    static func sources(_ item: UpcomingItem) -> String {
+        var seen = Set<String>()
+        let unique = item.sources.filter { seen.insert($0).inserted }
+        return ListFormatter.localizedString(byJoining: unique)
     }
 
     /// "turns 31", "8th anniversary", "birthday".

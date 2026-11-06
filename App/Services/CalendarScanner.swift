@@ -6,9 +6,15 @@ struct BirthdaySuggestion: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let date: MonthDay
-    /// Set when exactly one contact matches and it has no birthday yet.
-    let contactID: String?
-    let contactName: String?
+    /// Set when exactly one contact matches and it has no birthday yet, or
+    /// when you pick a contact yourself.
+    var contactID: String?
+    var contactName: String?
+    /// The calendar event it came from, so you can open it.
+    var eventID: String? = nil
+    var calendarTitle: String? = nil
+    /// Set when you pick a contact that already has a birthday; adding replaces it.
+    var existingBirthday: MonthDay? = nil
 }
 
 /// Pulls a person's name out of a birthday event title.
@@ -45,7 +51,12 @@ enum BirthdayTitleParser {
 }
 
 enum SuggestionMatcher {
-    struct Candidate: Hashable { let name: String; let date: MonthDay }
+    struct Candidate: Hashable {
+        let name: String
+        let date: MonthDay
+        var eventID: String? = nil
+        var calendarTitle: String? = nil
+    }
 
     static func suggestions(
         from candidates: [Candidate],
@@ -63,7 +74,9 @@ enum SuggestionMatcher {
             result.append(BirthdaySuggestion(
                 id: key, name: c.name, date: MonthDay(month: c.date.month, day: c.date.day),
                 contactID: match?.id,
-                contactName: match.map { [$0.givenName, $0.familyName].filter { !$0.isEmpty }.joined(separator: " ") }
+                contactName: match.map { [$0.givenName, $0.familyName].filter { !$0.isEmpty }.joined(separator: " ") },
+                eventID: c.eventID,
+                calendarTitle: c.calendarTitle
             ))
         }
         return result.sorted { ($0.contactID == nil ? 1 : 0, $0.name) < ($1.contactID == nil ? 1 : 0, $1.name) }
@@ -91,7 +104,11 @@ final class CalendarScanner {
             guard event.isAllDay, let name = BirthdayTitleParser.name(from: event.title ?? "") else { return nil }
             let c = calendar.dateComponents([.month, .day], from: event.startDate)
             guard let date = MonthDay(components: c) else { return nil }
-            return .init(name: name, date: date)
+            return .init(name: name, date: date, eventID: event.eventIdentifier, calendarTitle: event.calendar?.title)
         }
+    }
+
+    func event(id: String) -> EKEvent? {
+        store.event(withIdentifier: id)
     }
 }
