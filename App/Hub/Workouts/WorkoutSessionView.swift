@@ -307,7 +307,7 @@ struct WorkoutSummaryView: View {
                 ForEach(finished.graduations, id: \.self) { g in
                     Label("You graduated from \(g.from.name) to \(g.to.name).", systemImage: "graduationcap.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.Colors.ink)
+                        .foregroundStyle(Theme.Colors.onGold)
                         .padding(Theme.Spacing.m)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.Colors.gold, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
@@ -340,7 +340,7 @@ struct WorkoutSummaryView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(ex.name).font(.body.weight(.semibold)).foregroundStyle(Theme.Colors.ink)
-                    if row.hitTop { TagPill(text: "Hit the top", fill: Theme.Colors.gold, color: Theme.Colors.ink) }
+                    if row.hitTop { TagPill(text: "Hit the top", fill: Theme.Colors.gold, color: Theme.Colors.onGold) }
                 }
                 Text("\(WorkoutEngine.formatWeight(w)) lb · " + row.logged.map { "\($0.reps)" }.joined(separator: ", ") + (ex.timed ? " sec" : ""))
                     .font(.footnote).foregroundStyle(Theme.Colors.inkSoft)
