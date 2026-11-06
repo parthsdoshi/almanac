@@ -50,6 +50,8 @@ targets:
         NSHealthUpdateUsageDescription: "Shebang#! saves your finished lifts and the bodyweight you log to Apple Health."
         NSHealthShareUsageDescription: "Shebang#! doesn't read anything from Apple Health. It only saves your workouts and bodyweight there."
         UIBackgroundModes: [fetch]
+        INAlternativeAppNames:       # so "Jot in Shebang" works out loud
+          - INAlternativeAppName: Shebang
         BGTaskSchedulerPermittedIdentifiers: [occasions.refresh]
         CFBundleURLTypes:
           - CFBundleURLName: occasions

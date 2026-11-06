@@ -15,6 +15,8 @@ struct WidgetSnapshot: Codable, Sendable {
         let day: Int
         /// Birth or wedding year, when the contact has one.
         let originYear: Int?
+        /// Starred in the app. Optional so a snapshot written by an older build still reads.
+        var starred: Bool? = nil
     }
 
     /// The widget kind the app reloads after writing.
@@ -49,8 +51,8 @@ struct WidgetSnapshot: Codable, Sendable {
     }
 
     /// The soonest occasions on or after `date`'s day, soonest first.
-    func upcoming(from date: Date, limit: Int, calendar: Calendar = .current) -> [Upcoming] {
-        items.map { item in
+    func upcoming(from date: Date, limit: Int, starredOnly: Bool = false, calendar: Calendar = .current) -> [Upcoming] {
+        items.filter { !starredOnly || $0.starred == true }.map { item in
             let next = item.next(onOrAfter: date, calendar: calendar)
             let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: date), to: next).day ?? 0
             let year = calendar.component(.year, from: next)

@@ -16,6 +16,7 @@ struct NotesView: View {
                     Section {
                         ForEach(section.notes) { note in
                             NavigationLink(value: note.id) { NoteCard(note: note) }
+                                .annotatesNote(note.id)
                                 .listRowBackground(Theme.Colors.card)
                                 .swipeActions {
                                     Button(role: .destructive) { hub.deleteNote(note.id) } label: { Label("Delete", systemImage: "trash") }

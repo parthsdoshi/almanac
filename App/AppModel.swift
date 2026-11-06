@@ -268,7 +268,8 @@ final class AppModel {
         let snapshot = WidgetSnapshot(
             items: active.map {
                 .init(id: $0.id, kind: $0.kind, names: Names.join($0.firstNames),
-                      month: $0.date.month, day: $0.date.day, originYear: $0.date.year)
+                      month: $0.date.month, day: $0.date.day, originYear: $0.date.year,
+                      starred: store.state.starred.contains($0.id))
             },
             writtenAt: .now
         )

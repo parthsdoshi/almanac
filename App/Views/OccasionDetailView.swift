@@ -50,6 +50,7 @@ struct OccasionDetailView: View {
                 }
 
                 PersonNotesCard(item: item)
+                    .annotatesPerson(o.people.count == 1 ? o.people.first?.contactID : nil)
 
                 let history = model.actions(for: o.id)
                 if !history.isEmpty {
@@ -87,6 +88,7 @@ struct OccasionDetailView: View {
             }
             .ignoresSafeArea()
         }
+        .annotatesOccasion(o.id)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

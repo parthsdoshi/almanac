@@ -8,12 +8,12 @@ struct NextOccasionWidget: Widget {
     static let kind = WidgetSnapshot.widgetKind
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: Self.kind, provider: NextOccasionProvider()) { entry in
+        AppIntentConfiguration(kind: Self.kind, intent: NextUpConfiguration.self, provider: NextOccasionProvider()) { entry in
             NextOccasionView(entry: entry)
                 .containerBackground(Theme.Colors.paper, for: .widget)
         }
         .configurationDisplayName("Next up")
-        .description("The next birthdays and anniversaries, counting down.")
+        .description("The next birthdays and anniversaries, counting down. Edit it to show only the people you starred.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryInline])
     }
 }
@@ -23,22 +23,21 @@ struct NextOccasionEntry: TimelineEntry {
     let upcoming: [WidgetSnapshot.Upcoming]
     /// False until the app has written a snapshot (not opened yet, or no contacts access).
     let hasSnapshot: Bool
+    var starredOnly = false
 }
 
-struct NextOccasionProvider: TimelineProvider {
+struct NextOccasionProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> NextOccasionEntry {
         Self.sample
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (NextOccasionEntry) -> Void) {
-        if context.isPreview, WidgetSnapshot.load() == nil {
-            completion(Self.sample)
-        } else {
-            completion(Self.entry(at: .now, snapshot: WidgetSnapshot.load()))
-        }
+    func snapshot(for configuration: NextUpConfiguration, in context: Context) async -> NextOccasionEntry {
+        if context.isPreview, WidgetSnapshot.load() == nil { return Self.sample }
+        return Self.entry(at: .now, snapshot: WidgetSnapshot.load(), starredOnly: configuration.show == .starred)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<NextOccasionEntry>) -> Void) {
+    func timeline(for configuration: NextUpConfiguration, in context: Context) async -> Timeline<NextOccasionEntry> {
+        let starredOnly = configuration.show == .starred
         let snapshot = WidgetSnapshot.load()
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
@@ -47,15 +46,16 @@ struct NextOccasionProvider: TimelineProvider {
         for n in 1...7 {
             if let d = calendar.date(byAdding: .day, value: n, to: today) { dates.append(d) }
         }
-        let entries = dates.map { Self.entry(at: $0, snapshot: snapshot) }
-        completion(Timeline(entries: entries, policy: .after(dates.last!)))
+        let entries = dates.map { Self.entry(at: $0, snapshot: snapshot, starredOnly: starredOnly) }
+        return Timeline(entries: entries, policy: .after(dates.last!))
     }
 
-    static func entry(at date: Date, snapshot: WidgetSnapshot?) -> NextOccasionEntry {
+    static func entry(at date: Date, snapshot: WidgetSnapshot?, starredOnly: Bool = false) -> NextOccasionEntry {
         NextOccasionEntry(
             date: date,
-            upcoming: snapshot?.upcoming(from: date, limit: 3) ?? [],
-            hasSnapshot: snapshot != nil
+            upcoming: snapshot?.upcoming(from: date, limit: 3, starredOnly: starredOnly) ?? [],
+            hasSnapshot: snapshot != nil,
+            starredOnly: starredOnly
         )
     }
 
@@ -116,7 +116,8 @@ struct NextOccasionView: View {
     // Empty states
 
     private var emptyText: String {
-        entry.hasSnapshot ? "No birthdays yet" : "Open Shebang#! to load birthdays"
+        if !entry.hasSnapshot { return "Open Shebang#! to load birthdays" }
+        return entry.starredOnly ? "Star someone in Shebang#! to see them here" : "No birthdays yet"
     }
 
     // Small: one big tear-off page.

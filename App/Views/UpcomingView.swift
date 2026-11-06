@@ -50,6 +50,7 @@ struct UpcomingView: View {
                                     onOpen: { model.upcomingPath.append(item.occasion.id) },
                                     onMessage: { model.beginMessage(item.occasion) },
                                     onCall: { model.beginCall(item.occasion) })
+                                    .annotatesOccasion(item.occasion.id)
                                 .listRowBackground(Color.clear)
                                 .listRowInsets(EdgeInsets(top: Theme.Spacing.xs, leading: 0, bottom: Theme.Spacing.xs, trailing: 0))
                                 .modifier(RowSwipeActions(item: item))
@@ -61,6 +62,7 @@ struct UpcomingView: View {
                                 NavigationLink(value: item.occasion.id) {
                                     OccasionRow(item: item)
                                 }
+                                .annotatesOccasion(item.occasion.id)
                                 .modifier(RowSwipeActions(item: item))
                             }
                             .listRowBackground(Theme.Colors.card)

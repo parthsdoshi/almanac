@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 #if canImport(FoundationModels)
 import FoundationModels
@@ -21,7 +22,12 @@ enum OnDevice {
         if #available(iOS 26.0, *) {
             guard case .available = SystemLanguageModel.default.availability else { return nil }
             do {
-                let session = LanguageModelSession(instructions: instructions)
+                let session: LanguageModelSession
+                if #available(iOS 27.0, *) {
+                    session = LanguageModelSession(profile: ReadingProfile(instructions: instructions))
+                } else {
+                    session = LanguageModelSession(instructions: instructions)
+                }
                 let reply = try await session.respond(to: prompt)
                 let text = reply.content.trimmingCharacters(in: .whitespacesAndNewlines)
                 return text.isEmpty ? nil : text
@@ -33,9 +39,48 @@ enum OnDevice {
         return nil
     }
 
+    /// True when the on-device model can look at pictures (iOS 27).
+    static var canSeeImages: Bool {
+        #if canImport(FoundationModels)
+        if #available(iOS 27.0, *) {
+            guard case .available = SystemLanguageModel.default.availability else { return false }
+            return SystemLanguageModel.default.capabilities.contains(.vision)
+        }
+        #endif
+        return false
+    }
+
+    /// Same as `respond`, with a photo attached to the prompt. Nil before iOS 27,
+    /// or when this iPhone's model can't take images.
+    static func respond(instructions: String, prompt: String, image: CGImage) async -> String? {
+        #if canImport(FoundationModels)
+        if #available(iOS 27.0, *) {
+            guard canSeeImages else { return nil }
+            do {
+                let session = LanguageModelSession(profile: ReadingProfile(instructions: instructions))
+                let reply = try await session.respond {
+                    prompt
+                    Attachment(image).label("photo")
+                }
+                let text = reply.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                return text.isEmpty ? nil : text
+            } catch {
+                return nil
+            }
+        }
+        #endif
+        return nil
+    }
+
     /// Asks for a JSON object and decodes the first {...} in the reply.
-    static func json<T: Decodable>(_ type: T.Type, instructions: String, prompt: String) async -> T? {
-        guard let raw = await respond(instructions: instructions, prompt: prompt),
+    static func json<T: Decodable>(_ type: T.Type, instructions: String, prompt: String, image: CGImage? = nil) async -> T? {
+        let reply: String?
+        if let image {
+            reply = await respond(instructions: instructions, prompt: prompt, image: image)
+        } else {
+            reply = await respond(instructions: instructions, prompt: prompt)
+        }
+        guard let raw = reply,
               let open = raw.firstIndex(of: "{"), let close = raw.lastIndex(of: "}"), open < close,
               let data = String(raw[open...close]).data(using: .utf8) else { return nil }
         return try? JSONDecoder().decode(T.self, from: data)
@@ -59,6 +104,24 @@ enum OnDevice {
         return nil
     }
 }
+
+#if canImport(FoundationModels)
+/// iOS 27's Dynamic Profiles: one place that says how the app talks to the
+/// model. Everything the app asks is reading what you typed (or photographed)
+/// into a small JSON object, so: no creativity, short answers.
+@available(iOS 27.0, *)
+struct ReadingProfile: LanguageModelSession.DynamicProfile {
+    let instructions: String
+
+    var body: some LanguageModelSession.DynamicProfile {
+        Profile {
+            Instructions(instructions)
+        }
+        .samplingMode(.greedy)
+        .maximumResponseTokens(600)
+    }
+}
+#endif
 
 /// Finds a date (and time, if typed) in a line of text.
 enum DateFinder {
