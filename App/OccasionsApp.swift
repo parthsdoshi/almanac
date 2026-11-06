@@ -23,7 +23,10 @@ struct OccasionsApp: App {
                 .onOpenURL { url in Task { await model.handle(url: url) } }
                 .onChange(of: scenePhase) { _, phase in
                     // Picks up contact edits and time zone changes (travel) when you come back.
-                    if phase == .active { Task { await model.reload() } }
+                    if phase == .active {
+                        Task { await model.reload() }
+                        CloudSync.shared.fetchNow()
+                    }
                 }
         }
         .backgroundTask(.appRefresh(AppConstants.refreshTaskID)) {
@@ -38,6 +41,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        // iCloud sync hears about changes from your other devices by silent push.
+        application.registerForRemoteNotifications()
         return true
     }
 

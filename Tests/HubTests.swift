@@ -169,3 +169,75 @@ import Testing
         #expect(DayRundown.rundown(f) == "It's a run day, no lifting.")
     }
 }
+
+@Suite struct SyncItemTests {
+    private func person(_ id: String, _ given: String, _ family: String) -> Person {
+        Person(contactID: id, givenName: given, familyName: family, phoneNumbers: [])
+    }
+
+    @Test func roundTripsIntoAnEmptyPhone() {
+        var hub = HubState()
+        hub.notes = [Note(title: "Trip", body: "Ella train")]
+        hub.workouts.history = [WorkoutSession(date: "2026-11-03T12:00:00.000Z", workout: .a, durationSec: 100, sets: [])]
+        hub.workouts.bodyweight = [BodyweightEntry(date: "2026-11-03", lb: 171)]
+        hub.workouts.weights = ["db-bench": 50]
+        let items = SyncItems.items(hub: hub, app: PersistedState(), keys: SyncKeys(), unresolved: SyncUnresolved())
+        #expect(items.count == 4)
+
+        var other = HubState()
+        var app = PersistedState()
+        var unresolved = SyncUnresolved()
+        for (_, item) in items {
+            SyncItems.apply(item.kind, item.data, hub: &other, app: &app, keys: SyncKeys(), unresolved: &unresolved)
+        }
+        #expect(other.notes.map(\.body) == ["Ella train"])
+        #expect(other.workouts.history.count == 1)
+        #expect(other.workouts.bodyweight.first?.lb == 171)
+        #expect(other.workouts.weights["db-bench"] == 50)
+    }
+
+    @Test func starsMatchByNameAcrossPhones() {
+        let mine = Occasion(kind: .birthday, people: [person("A1", "Priya", "Patel")], date: MonthDay(month: 3, day: 3))
+        var app = PersistedState()
+        app.starred = [mine.id]
+        let myKeys = SyncKeys.build(occasions: [mine], contacts: [])
+        let prefs = SyncItems.prefs(hub: HubState(), app: app, keys: myKeys, unresolved: SyncUnresolved())
+        #expect(prefs.starred == ["birthday|priya patel"])
+
+        // Same person, different contact id on the other phone.
+        let theirs = Occasion(kind: .birthday, people: [person("ZZ9", "Priya", "Patel")], date: MonthDay(month: 3, day: 3))
+        var hub = HubState()
+        var otherApp = PersistedState()
+        var unresolved = SyncUnresolved()
+        SyncItems.apply(.prefs, SyncItems.encode(prefs), hub: &hub, app: &otherApp,
+                        keys: SyncKeys.build(occasions: [theirs], contacts: []), unresolved: &unresolved)
+        #expect(otherApp.starred == [theirs.id])
+        #expect(unresolved.starred.isEmpty)
+    }
+
+    @Test func unknownStarsWaitForContacts() {
+        var prefs = SyncPrefs()
+        prefs.starred = ["birthday|priya patel"]
+        var hub = HubState()
+        var app = PersistedState()
+        var unresolved = SyncUnresolved()
+        SyncItems.apply(.prefs, SyncItems.encode(prefs), hub: &hub, app: &app, keys: SyncKeys(), unresolved: &unresolved)
+        #expect(app.starred.isEmpty)
+        #expect(unresolved.starred == ["birthday|priya patel"])
+        // Still sent back up, so the other phone doesn't lose it.
+        #expect(SyncItems.prefs(hub: hub, app: app, keys: SyncKeys(), unresolved: unresolved).starred == ["birthday|priya patel"])
+
+        let o = Occasion(kind: .birthday, people: [person("B2", "Priya", "Patel")], date: MonthDay(month: 3, day: 3))
+        SyncItems.resolve(hub: &hub, app: &app, keys: SyncKeys.build(occasions: [o], contacts: []), unresolved: &unresolved)
+        #expect(app.starred == [o.id])
+        #expect(unresolved.starred.isEmpty)
+    }
+
+    @Test func deletionsRemoveTheThing() {
+        var hub = HubState()
+        let n = Note(title: "", body: "x")
+        hub.notes = [n]
+        SyncItems.remove("note.\(n.id.uuidString)", hub: &hub)
+        #expect(hub.notes.isEmpty)
+    }
+}

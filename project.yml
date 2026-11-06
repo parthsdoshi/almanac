@@ -29,6 +29,8 @@ targets:
         com.apple.security.application-groups: [$(APP_GROUP_ID)]   # shared with the widget
         com.apple.developer.healthkit: true                        # saves finished lifts to Health
         com.apple.developer.healthkit.access: []
+        com.apple.developer.icloud-container-identifiers: [iCloud.$(APP_BUNDLE_ID)]   # iCloud sync
+        com.apple.developer.icloud-services: [CloudKit]
     info:
       path: App/Info.plist
       properties:
@@ -49,7 +51,7 @@ targets:
         NSCalendarsFullAccessUsageDescription: "Shebang#! looks through your calendar for birthday events that aren't in your contacts yet, and shows today's events on the Today screen."
         NSHealthUpdateUsageDescription: "Shebang#! saves your finished lifts and the bodyweight you log to Apple Health."
         NSHealthShareUsageDescription: "Shebang#! doesn't read anything from Apple Health. It only saves your workouts and bodyweight there."
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, remote-notification]
         BGTaskSchedulerPermittedIdentifiers: [occasions.refresh]
         CFBundleURLTypes:
           - CFBundleURLName: occasions

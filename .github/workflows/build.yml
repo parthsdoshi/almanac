@@ -5,7 +5,7 @@ name: Build
 
 on:
   push:
-    branches: [main, widget, feedback, hub, health, jot]
+    branches: [main, widget, feedback, hub, health, jot, icloud]
   pull_request:
   workflow_dispatch:
 
