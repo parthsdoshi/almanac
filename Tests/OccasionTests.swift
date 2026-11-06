@@ -239,3 +239,36 @@ private func contact(
         #expect(Names.join(["A", "B", "C"]) == "A, B & C")
     }
 }
+
+@Suite struct WidgetSnapshotTests {
+    private let cal: Calendar = {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(identifier: "America/New_York")!
+        return c
+    }()
+
+    private func day(_ y: Int, _ m: Int, _ d: Int, hour: Int = 12) -> Date {
+        cal.date(from: DateComponents(year: y, month: m, day: d, hour: hour))!
+    }
+
+    @Test func soonestFirstWithTodayAtZeroAndAges() {
+        let snap = WidgetSnapshot(items: [
+            .init(id: "a", kind: .birthday, names: "Priya", month: 11, day: 20, originYear: 1995),
+            .init(id: "b", kind: .anniversary, names: "Rohan & Anika", month: 11, day: 5, originYear: 2019),
+            .init(id: "c", kind: .birthday, names: "Leo", month: 1, day: 2, originYear: nil),
+        ], writtenAt: .now)
+        let up = snap.upcoming(from: day(2026, 11, 5, hour: 21), limit: 3, calendar: cal)
+        #expect(up.map(\.item.id) == ["b", "a", "c"])
+        #expect(up.map(\.daysUntil) == [0, 15, 58])
+        #expect(up[0].years == 7)
+        #expect(up[1].years == 31)
+        #expect(up[2].years == nil)
+    }
+
+    @Test func leapDayFallsOnFeb28() {
+        let snap = WidgetSnapshot(items: [
+            .init(id: "x", kind: .birthday, names: "Sam", month: 2, day: 29, originYear: nil),
+        ], writtenAt: .now)
+        #expect(snap.upcoming(from: day(2027, 2, 1), limit: 1, calendar: cal).first?.daysUntil == 27)
+    }
+}

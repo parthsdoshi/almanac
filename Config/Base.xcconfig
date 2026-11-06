@@ -2,6 +2,8 @@
 // copy Secrets.example.xcconfig to Secrets.xcconfig (gitignored) and fill that in.
 APP_BUNDLE_ID = com.example.occasions
 DEVELOPMENT_TEAM =
+// Shared container for the home screen widget. Automatic signing registers it.
+APP_GROUP_ID = group.$(APP_BUNDLE_ID)
 // Host only, no scheme. xcconfig treats "//" as a comment, so "https://" can't go here.
 OCCASIONS_SERVER_HOST =
 OCCASIONS_API_KEY =

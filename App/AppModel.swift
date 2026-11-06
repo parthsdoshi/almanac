@@ -1,5 +1,6 @@
 import BackgroundTasks
 import Foundation
+import WidgetKit
 import MessageUI
 import Observation
 import UIKit
@@ -174,7 +175,25 @@ final class AppModel {
             calendar: calendar
         )
         await notifications.replace(with: items)
+        updateWidget(active: active)
         await syncServer(force: false)
+    }
+
+    /// Hands the home screen widget the unmuted occasions (first names and dates only).
+    private func updateWidget(active: [Occasion]) {
+        let snapshot = WidgetSnapshot(
+            items: active.map {
+                .init(id: $0.id, kind: $0.kind, names: Names.join($0.firstNames),
+                      month: $0.date.month, day: $0.date.day, originYear: $0.date.year)
+            },
+            writtenAt: .now
+        )
+        do {
+            try snapshot.save()
+            WidgetCenter.shared.reloadTimelines(ofKind: WidgetSnapshot.widgetKind)
+        } catch {
+            // The widget keeps its last snapshot; nothing else depends on this.
+        }
     }
 
     /// Keeps Live Activities in line with the occasions, and returns the ids whose

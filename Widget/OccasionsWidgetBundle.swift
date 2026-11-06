@@ -5,5 +5,6 @@ import WidgetKit
 struct OccasionsWidgetBundle: WidgetBundle {
     var body: some Widget {
         OccasionLiveActivity()
+        NextOccasionWidget()
     }
 }

@@ -26,12 +26,14 @@ targets:
       path: App/Occasions.entitlements
       properties:
         aps-environment: development
+        com.apple.security.application-groups: [$(APP_GROUP_ID)]   # shared with the widget
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Almanac
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        AppGroupID: $(APP_GROUP_ID)
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSSupportsLiveActivities: true
@@ -65,12 +67,17 @@ targets:
     sources:
       - Widget
       - Shared
+    entitlements:
+      path: Widget/OccasionsWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [$(APP_GROUP_ID)]   # reads the app's widget snapshot
     info:
       path: Widget/Info.plist
       properties:
         CFBundleDisplayName: Almanac
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        AppGroupID: $(APP_GROUP_ID)
         UIAppFonts:              # Shared/Fonts, bundled into the app and the widget
           - AlmanacDisplay-Black.ttf
           - AlmanacDisplay-Bold.ttf
