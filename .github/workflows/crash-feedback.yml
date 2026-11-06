@@ -1,0 +1,24 @@
+# Prints the newest TestFlight crash reports (trimmed to the crashing thread).
+name: Crash feedback
+
+on:
+  push:
+    branches: [crash-repro]
+  workflow_dispatch:
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read crash reports
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+        run: |
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          export AUTH_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          pip install -q pyjwt cryptography
+          python3 ci/crash_feedback.py
