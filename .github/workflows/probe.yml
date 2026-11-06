@@ -2,41 +2,41 @@ name: SDK probe
 on:
   push:
     branches: [sdk-probe]
+permissions:
+  contents: write
 jobs:
   probe:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [xcode-27]
-    runs-on: ${{ matrix.os }}
+    runs-on: xcode-27
     timeout-minutes: 20
     steps:
-      - name: List Xcodes
+      - uses: actions/checkout@v4
+      - name: Dump Xcode 27.2 SDK interfaces
         run: |
-          sw_vers || true
-          ls -d /Applications/Xcode*.app || true
-      - name: Dump newest SDK interfaces
-        run: |
-          X=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | grep -v beta | sort -V | tail -1); [ -z "$X" ] && X=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1); xcodebuild -version || true
-          [ -z "$X" ] && X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
-          echo "Using $X"
-          SDK="$X/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-          ls "$X/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/"
-          mkdir -p out
+          X=/Applications/Xcode_27.2.app
+          [ -d "$X" ] || X=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)
+          echo "Using $X"; "$X/Contents/Developer/usr/bin/xcodebuild" -version
+          P="$X/Contents/Developer/Platforms/iPhoneOS.platform/Developer"
+          SDK="$P/SDKs/iPhoneOS.sdk"
+          mkdir -p dump
+          "$X/Contents/Developer/usr/bin/xcodebuild" -version > dump/VERSION
+          ls "$SDK/System/Library/Frameworks" > dump/frameworks.txt
+          ls "$P/Library/Frameworks" > dump/devframeworks.txt
           for fw in FoundationModels AppIntents WidgetKit SwiftUI Vision CoreSpotlight; do
-            f=$(find "$SDK/System/Library/Frameworks/$fw.framework" -name "arm64e-apple-ios.swiftinterface" 2>/dev/null | head -1)
-            [ -z "$f" ] && f=$(find "$SDK/System/Library/Frameworks/$fw.framework" -name "*.swiftinterface" 2>/dev/null | head -1)
-            echo "$fw -> $f"
-            [ -n "$f" ] && cp "$f" "out/$fw.swiftinterface"
+            f=$(find "$SDK/System/Library/Frameworks/$fw.framework" -name "arm64e-apple-ios.swiftinterface" | head -1)
+            [ -n "$f" ] && cp "$f" "dump/$fw.swiftinterface"
           done
-          ls "$SDK/System/Library/Frameworks" | grep -i -E "eval|intent|model|annot|ai" || true
-          for fw in $(ls "$SDK/System/Library/Frameworks" | grep -i -E "Evaluat|Testing" | sed 's/.framework//'); do
-            f=$(find "$SDK/System/Library/Frameworks/$fw.framework" -name "*.swiftinterface" 2>/dev/null | head -1)
-            [ -n "$f" ] && cp "$f" "out/$fw.swiftinterface"
+          for d in "$P/Library/Frameworks"/*.framework "$SDK/System/Library/Frameworks"/*.framework; do
+            n=$(basename "$d" .framework)
+            case "$n" in *Eval*|*AppIntentsTest*|*Annotation*|*Profile*)
+              f=$(find "$d" -name "arm64e-apple-ios.swiftinterface" -o -name "arm64-apple-ios.swiftinterface" | head -1)
+              [ -n "$f" ] && cp "$f" "dump/$n.swiftinterface" && echo "copied $n";;
+            esac
           done
-          find "$X/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks" -maxdepth 1 2>/dev/null | head -40
-          ls -la out
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sdk-${{ matrix.os }}
-          path: out
+          ls -la dump
+      - name: Push dump to sdk-dump branch
+        run: |
+          git config user.name ci; git config user.email ci@example.invalid
+          git checkout --orphan sdk-dump
+          git rm -rfq --cached . ; git add -f dump
+          git commit -qm "SDK interfaces"
+          git push -f origin HEAD:sdk-dump
