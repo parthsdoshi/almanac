@@ -76,14 +76,14 @@ struct JotSplitEvaluation: Evaluation {
     var name: String { "Jot split" }
 
     var dataset: ArrayLoader<JotSplitSample> {
-        [
+        ArrayLoader(samples: [
             JotSplitSample(input: "I need to call mom, buy milk and renew my passport", expected: 3),
             JotSplitSample(input: "email Dan, pay rent, and book flights", expected: 3),
             JotSplitSample(input: "call the bank and pay the bill", expected: 2),
             JotSplitSample(input: "buy salt and pepper", expected: 1),
             JotSplitSample(input: "- milk\n- eggs\n- bread", expected: 3),
             JotSplitSample(input: "call mom on Friday, Nov 7", expected: 1),
-        ]
+        ])
     }
 
     nonisolated(nonsending) func subject(from sample: JotSplitSample) async throws -> ModelSubject<Int> {
