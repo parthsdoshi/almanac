@@ -45,7 +45,7 @@ struct RootView: View {
             }
         }
         .alert(
-            "Occasions",
+            "Almanac",
             isPresented: Binding(get: { model.alertMessage != nil }, set: { if !$0 { model.alertMessage = nil } })
         ) {
             Button("OK", role: .cancel) {}
