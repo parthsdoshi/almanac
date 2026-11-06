@@ -1,11 +1,12 @@
 # Runs the Siri intent tests (AppIntentsTesting) against the installed app.
 # They need the iOS 27.2 Simulator, which the runner image doesn't ship, so this
-# downloads it first. Needs no secrets.
+# downloads it first. The app is signed to run locally (ad hoc, no account), because
+# iOS only lets these tests drive a development build. Needs no secrets.
 name: Siri tests
 
+# Manual for now: on GitHub's runners iOS refuses these tests for an unsigned
+# build, and the runner stalls with a locally signed one. They run from Xcode on a Mac.
 on:
-  push:
-    branches: [ios27]
   workflow_dispatch:
 
 concurrency:
@@ -27,7 +28,8 @@ jobs:
 
       - name: Get the iOS 27.2 Simulator
         run: |
-          xcodebuild -downloadPlatform iOS -buildVersion 27.2 || xcodebuild -downloadPlatform iOS
+          # The general iOS 27.2, not a single-device build (iOS 27.x for iPhone Duo only).
+          xcodebuild -downloadPlatform iOS -buildVersion 24B114 || xcodebuild -downloadPlatform iOS -buildVersion 27.2 || xcodebuild -downloadPlatform iOS
           xcrun simctl list runtimes
 
       - name: Generate the Xcode project
@@ -39,12 +41,14 @@ jobs:
 
       - name: Run the Siri tests
         run: |
-          RT=$(xcrun simctl list runtimes available -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS"]; r.sort(key=lambda x:[int(n) for n in x["version"].split(".")]); print(r[-1]["identifier"])')
-          DT=$(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+ Pro", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0])); print(t[-1]["identifier"])')
-          UDID=$(xcrun simctl create "Siri iPhone" "$DT" "$RT")
+          RT=$(xcrun simctl list runtimes available -j | python3 -c 'import json,re,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS" and re.search(r"SimRuntime\.iOS-\d+-\d+$", x["identifier"])]; r.sort(key=lambda x:[int(n) for n in x["version"].split(".")]); print(r[-1]["identifier"])')
+          UDID=""
+          for DT in $(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0]), reverse=True); print("\n".join(x["identifier"] for x in t))'); do
+            UDID=$(xcrun simctl create "Siri iPhone" "$DT" "$RT" 2>/dev/null) && break
+          done
           echo "Runtime $RT, device $UDID"
           xcodebuild test \
             -project Occasions.xcodeproj -scheme Occasions \
             -only-testing:OccasionsUITests \
             -destination "id=$UDID" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=

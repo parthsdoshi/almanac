@@ -11,8 +11,6 @@ final class SiriIntentTests: XCTestCase {
 
     override func setUp() {
         continueAfterFailure = false
-        // Opens once so iOS registers the app's intents and entities.
-        XCUIApplication().launch()
     }
 
     func testJotSavesANoteThatSiriCanFind() async throws {
