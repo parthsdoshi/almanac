@@ -35,7 +35,7 @@ jobs:
 
       - name: Build for the Simulator
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; rt=sorted((k for k in d if "iOS" in k and any(x["name"].startswith("iPhone") for x in d[k])), key=lambda k: [int(n) for n in k.split("iOS-")[-1].split("-")]); print(next(x["udid"] for x in d[rt[-1]] if x["name"].startswith("iPhone")))')
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin)["devices"]; rt=sorted((k for k in d if "iOS" in k and any(x["name"].startswith("iPhone") for x in d[k])), key=lambda k: [int(n) for n in re.findall(r"\d+", k.split("iOS-")[-1])[:2]]); print(next(x["udid"] for x in d[rt[-1]] if x["name"].startswith("iPhone")))')
           echo "UDID=$UDID" >> "$GITHUB_ENV"
           xcodebuild build \
             -project Occasions.xcodeproj -scheme Occasions -configuration Debug \
