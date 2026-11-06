@@ -35,7 +35,14 @@ jobs:
 
       - name: Build for the Simulator
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin)["devices"]; rt=sorted((k for k in d if "iOS" in k and any(x["name"].startswith("iPhone") for x in d[k])), key=lambda k: [int(n) for n in re.findall(r"\d+", k.split("iOS-")[-1])[:2]]); ph=[x for x in d[rt[-1]] if x["name"].startswith("iPhone")]; pl=[x for x in ph if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; print((pl or ph)[-1]["udid"])')
+          # Newest iOS runtime; a plain iPhone on it (made if the image only has the two-screen one).
+          RT=$(xcrun simctl list runtimes available -j | python3 -c 'import json,re,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS"]; r.sort(key=lambda x:[int(n) for n in x["version"].split(".")]); print(r[-1]["identifier"])')
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin)["devices"].get(sys.argv[1],[]); p=[x for x in d if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; print(p[-1]["udid"] if p else "")' "$RT")
+          if [ -z "$UDID" ]; then
+            DT=$(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+ Pro", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0])); print(t[-1]["identifier"])')
+            UDID=$(xcrun simctl create "Shots iPhone" "$DT" "$RT")
+          fi
+          echo "Runtime $RT, device $UDID"
           echo "UDID=$UDID" >> "$GITHUB_ENV"
           xcodebuild build \
             -project Occasions.xcodeproj -scheme Occasions -configuration Debug \
