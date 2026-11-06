@@ -107,3 +107,5 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).tests
         GENERATE_INFOPLIST_FILE: YES
+        # AppIntentsTesting needs iOS 27.2 parts; weak links let the bundle load on older Simulators, where those tests skip.
+        OTHER_LDFLAGS: $(inherited) -weak_framework AppIntentsTesting -weak_framework AppIntentsTypeSupport
