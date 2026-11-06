@@ -83,7 +83,7 @@ struct TodayView: View {
     private var rundownCard: some View {
         if let rundown, !rundown.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
-                SparkleEyebrow(text: "Your day")
+                Eyebrow(text: "Your day")
                 Text(rundown)
                     .font(Theme.Typography.display(19, .italic, relativeTo: .title3))
                     .foregroundStyle(Theme.Colors.ink)
@@ -124,12 +124,7 @@ struct TodayView: View {
     private func refresh(rewrite: Bool) async {
         reminders = await RemindersService.shared.today()
         events = RemindersService.shared.eventsToday()
-        let f = facts()
-        rundown = DayRundown.plain(f)
-        if rewrite || rundown == nil {
-            let better = await DayRundown.rundown(f)
-            rundown = better
-        }
+        rundown = DayRundown.rundown(facts())
     }
 
     // MARK: Workout

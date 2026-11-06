@@ -124,4 +124,48 @@ import Testing
         #expect(t.todos.contains { $0.text.hasPrefix("Confirm share counts") })
         #expect(t.todos.count == 2)
     }
+
+    @Test func splitsASentenceOfTodos() {
+        #expect(RuleCapture.split("I need to call mom, buy milk and renew my passport") == ["call mom", "buy milk", "renew my passport"])
+        #expect(RuleCapture.split("email Dan, pay rent, and book flights") == ["email Dan", "pay rent", "book flights"])
+        #expect(RuleCapture.split("call the bank and pay the bill") == ["call the bank", "pay the bill"])
+        #expect(RuleCapture.split("buy salt and pepper") == ["buy salt and pepper"])
+        #expect(RuleCapture.split("- milk\n- eggs\n- bread") == ["milk", "eggs", "bread"])
+        #expect(RuleCapture.split("call mom on Friday, Nov 7").count == 1)
+    }
+
+    @Test func listLinesBecomeTodos() {
+        let g = RuleCapture.todo("milk")
+        #expect(g.kind == .reminder)
+        #expect(g.text == "Milk")
+        #expect(g.horizon == .thisWeek)
+    }
+
+    @Test func statedHorizons() {
+        #expect(Horizon.stated(in: "pay the bill asap") == .today)
+        #expect(Horizon.stated(in: "i know the drill") == nil)
+        #expect(Horizon.stated(in: "fix the bike next week") == .nextWeek)
+    }
+
+    @Test func horizonDates() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "America/New_York")!
+        func day(_ m: Int, _ d: Int) -> Date { cal.date(from: DateComponents(year: 2026, month: m, day: d, hour: 23))! }
+        func ymd(_ date: Date?) -> String { date.map { let c = cal.dateComponents([.month, .day], from: $0); return "\(c.month!)/\(c.day!)" } ?? "nil" }
+        let thu = day(11, 5)
+        #expect(ymd(Horizon.today.date(from: thu, calendar: cal)) == "11/5")
+        #expect(ymd(Horizon.thisWeek.date(from: thu, calendar: cal)) == "11/6")
+        #expect(ymd(Horizon.nextWeek.date(from: thu, calendar: cal)) == "11/13")
+        #expect(ymd(Horizon.thisMonth.date(from: thu, calendar: cal)) == "11/30")
+        #expect(Horizon.someday.date(from: thu, calendar: cal) == nil)
+        let sat = day(11, 7)
+        #expect(ymd(Horizon.thisWeek.date(from: sat, calendar: cal)) == "11/8")
+        #expect(ymd(Horizon.thisMonth.date(from: day(11, 28), calendar: cal)) == "11/30")
+    }
+
+    @Test func rundownSticksToFacts() {
+        var f = DayFacts()
+        f.dayKind = "run day"
+        #expect(DayRundown.rundown(f) == "It's a run day, no lifting.")
+    }
 }
