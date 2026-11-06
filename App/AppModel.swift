@@ -166,7 +166,10 @@ final class AppModel {
 
     /// First run (after Contacts access), or replayed from Settings.
     var tutorialPresented: Bool {
-        showTutorial || (contactsAccess.canRead && !store.state.seenTutorial)
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "UIShots") { return false }
+        #endif
+        return showTutorial || (contactsAccess.canRead && !store.state.seenTutorial)
     }
 
     func finishTutorial() {

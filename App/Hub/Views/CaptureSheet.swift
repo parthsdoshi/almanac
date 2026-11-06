@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UIKit
 
 /// When a to-do is due: the day it says, a rough "by when", or a picked date.
 enum WhenChoice: Hashable {
@@ -61,6 +63,12 @@ struct CaptureSheet: View {
     @State private var personID: String?
     @State private var saving = false
     @State private var readTask: Task<Void, Never>?
+    @State private var photoItem: PhotosPickerItem?
+    @State private var choosingPhoto = false
+    @State private var takingPhoto = false
+    @State private var photo: UIImage?
+    @State private var readingPhoto = false
+    @State private var photoMiss = false
     @FocusState private var focused: Bool
 
     private var isList: Bool { list.count >= 2 }
@@ -69,13 +77,18 @@ struct CaptureSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.m) {
-                    TextField("Remind me to…, a few to-dos, an idea, a birthday", text: $text, axis: .vertical)
-                        .font(.title3)
-                        .lineLimit(2...8)
-                        .focused($focused)
-                        .padding(14)
-                        .paperCard(radius: 12)
-                        .onChange(of: text) { _, _ in scheduleRead() }
+                    if photo != nil || readingPhoto { photoHeader }
+
+                    HStack(alignment: .top, spacing: 10) {
+                        TextField("Remind me to…, a few to-dos, an idea, a birthday", text: $text, axis: .vertical)
+                            .font(.title3)
+                            .lineLimit(2...8)
+                            .focused($focused)
+                            .onChange(of: text) { _, _ in scheduleRead() }
+                        photoButton
+                    }
+                    .padding(14)
+                    .paperCard(radius: 12)
 
                     if isList {
                         readsAs
@@ -115,7 +128,82 @@ struct CaptureSheet: View {
                     .padding(.bottom, Theme.Spacing.s)
             }
             .onAppear { focused = true }
+            .photosPicker(isPresented: $choosingPhoto, selection: $photoItem, matching: .images)
+            .onChange(of: photoItem) { _, item in
+                guard let item else { return }
+                photoItem = nil
+                Task {
+                    guard let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { return }
+                    await readPhoto(image)
+                }
+            }
+            .fullScreenCover(isPresented: $takingPhoto) {
+                CameraPicker { image in
+                    takingPhoto = false
+                    if let image { Task { await readPhoto(image) } }
+                }
+                .ignoresSafeArea()
+            }
         }
+    }
+
+    // MARK: Photo
+
+    private var photoButton: some View {
+        Menu {
+            if CameraPicker.isAvailable {
+                Button { takingPhoto = true } label: { Label("Take photo", systemImage: "camera") }
+            }
+            Button { choosingPhoto = true } label: { Label("Choose from Photos", systemImage: "photo") }
+        } label: {
+            Image(systemName: "camera")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Theme.Colors.birthday)
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Theme.Colors.birthday.opacity(0.12)))
+        }
+        .accessibilityLabel("Add from a photo")
+    }
+
+    private var photoHeader: some View {
+        HStack(alignment: .center, spacing: 12) {
+            if let photo {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    SparkleEyebrow(text: "Read from your photo")
+                    if readingPhoto { ProgressView().controlSize(.mini) }
+                }
+                Text(readingPhoto ? "Reading the words on it…" : photoMiss ? "Couldn't find any words. Type it instead." : "Check it below, then add it.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.Colors.inkSoft)
+            }
+            Spacer(minLength: 0)
+            if photo != nil, !readingPhoto {
+                Button { photo = nil; photoMiss = false } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.Colors.inkSoft)
+                }
+                .accessibilityLabel("Remove photo")
+            }
+        }
+    }
+
+    private func readPhoto(_ image: UIImage) async {
+        let upright = image.uprightScaled(maxSide: 2048)
+        photo = upright
+        photoMiss = false
+        guard let cg = upright.cgImage else { photoMiss = true; return }
+        readingPhoto = true
+        let read = await PhotoReader.read(cg)
+        readingPhoto = false
+        guard !read.lines.isEmpty else { photoMiss = true; return }
+        let joined = read.lines.joined(separator: "\n")
+        text = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? joined : text + "\n" + joined
     }
 
     private var readsAs: some View {
@@ -451,6 +539,50 @@ struct CaptureSheet: View {
             dismiss()
             // Let this sheet finish closing before Add opens.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { open(line) }
+        }
+    }
+}
+
+/// The system camera, for Jot's "Take photo".
+struct CameraPicker: UIViewControllerRepresentable {
+    static var isAvailable: Bool { UIImagePickerController.isSourceTypeAvailable(.camera) }
+
+    let done: (UIImage?) -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ controller: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(done: done) }
+
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let done: (UIImage?) -> Void
+        init(done: @escaping (UIImage?) -> Void) { self.done = done }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            done(info[.originalImage] as? UIImage)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { done(nil) }
+    }
+}
+
+extension UIImage {
+    /// Redrawn the right way up and no bigger than `maxSide`, so Vision and the
+    /// model see what the person saw.
+    func uprightScaled(maxSide: CGFloat) -> UIImage {
+        let longest = max(size.width, size.height)
+        let scale = longest > maxSide ? maxSide / longest : 1
+        let target = CGSize(width: (size.width * scale).rounded(), height: (size.height * scale).rounded())
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: target, format: format).image { _ in
+            draw(in: CGRect(origin: .zero, size: target))
         }
     }
 }

@@ -1,0 +1,99 @@
+# Takes Simulator screenshots of the main tabs on the newest iOS, light and
+# dark, so the paper look can be checked under the system's own bars without
+# a phone. Pushes them to the shots-<branch> branch. Needs no secrets.
+name: Screenshots
+
+on:
+  push:
+    branches: [ios27]
+  workflow_dispatch:
+
+concurrency:
+  group: shots-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Xcode 27.2
+        run: |
+          X=/Applications/Xcode_27.2.app
+          [ -d "$X" ] || X=$(ls -d /Applications/Xcode_27*.app | grep -v -i -E "beta|candidate" | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build for the Simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; rt=sorted((k for k in d if "iOS" in k and any(x["name"].startswith("iPhone") for x in d[k])), key=lambda k: [int(n) for n in k.split("iOS-")[-1].split("-")]); print(next(x["udid"] for x in d[rt[-1]] if x["name"].startswith("iPhone")))')
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcodebuild build \
+            -project Occasions.xcodeproj -scheme Occasions -configuration Debug \
+            -destination "id=$UDID" -derivedDataPath dd \
+            CODE_SIGNING_ALLOWED=NO | tail -5
+
+      - name: Take screenshots
+        run: |
+          APP=$(ls -d dd/Build/Products/Debug-iphonesimulator/*.app | grep -v Tests | head -1)
+          BID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist")
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          cat > people.vcf <<'VCF'
+          BEGIN:VCARD
+          VERSION:3.0
+          N:Shah;Priya;;;
+          FN:Priya Shah
+          BDAY:1991-11-12
+          END:VCARD
+          BEGIN:VCARD
+          VERSION:3.0
+          N:Rivera;Sam;;;
+          FN:Sam Rivera
+          BDAY:1988-11-19
+          END:VCARD
+          BEGIN:VCARD
+          VERSION:3.0
+          N:Park;Lee;;;
+          FN:Lee Park
+          BDAY:1990-12-03
+          END:VCARD
+          VCF
+          sed -i '' 's/^ *//' people.vcf
+          xcrun simctl addmedia "$UDID" people.vcf || echo "contacts not added"
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl privacy "$UDID" grant contacts "$BID" || true
+          xcrun simctl privacy "$UDID" grant reminders "$BID" || true
+          xcrun simctl privacy "$UDID" grant calendar "$BID" || true
+          xcrun simctl status_bar "$UDID" override --time 9:41 --batteryLevel 100 --cellularBars 4 || true
+          mkdir -p shots
+          xcrun simctl runtime list 2>/dev/null | head -5 > shots/runtime.txt || true
+          xcrun simctl list devices booted >> shots/runtime.txt
+          for look in light dark; do
+            xcrun simctl ui "$UDID" appearance "$look"
+            for tab in today upcoming workouts notes settings; do
+              xcrun simctl terminate "$UDID" "$BID" 2>/dev/null || true
+              xcrun simctl launch "$UDID" "$BID" -UIShots YES -UIShotsTab "$tab"
+              sleep 6
+              xcrun simctl io "$UDID" screenshot "shots/$look-$tab.png"
+            done
+          done
+          ls -la shots
+
+      - name: Push the screenshots
+        run: |
+          cd shots
+          git init -q
+          git checkout -q -b "shots-${GITHUB_REF_NAME}"
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Screenshots of ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "HEAD:shots-${GITHUB_REF_NAME}"

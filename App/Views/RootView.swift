@@ -38,6 +38,18 @@ struct RootView: View {
             }
         }
         .tint(Theme.Colors.accent)
+        #if DEBUG
+        .onAppear {
+            // CI screenshots: open on the tab the run asks for.
+            switch UserDefaults.standard.string(forKey: "UIShotsTab") {
+            case "upcoming": model.selectedTab = .upcoming
+            case "workouts": model.selectedTab = .workouts
+            case "notes": model.selectedTab = .notes
+            case "settings": model.selectedTab = .settings
+            default: break
+            }
+        }
+        #endif
         .fullScreenCover(isPresented: Binding(
             get: { model.tutorialPresented },
             set: { if !$0 { model.finishTutorial() } }
