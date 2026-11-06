@@ -4,6 +4,8 @@ struct UpcomingView: View {
     @Environment(AppModel.self) private var model
     @State private var adding = false
     @State private var query = ""
+    @State private var showingStats = false
+    @State private var showingSuggestions = false
 
     private struct DaySection: Identifiable {
         let id: String
@@ -19,6 +21,24 @@ struct UpcomingView: View {
                         title: "Upcoming",
                         eyebrow: Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()).replacingOccurrences(of: ",", with: " ·"))
                         .screenHeaderRow()
+                }
+
+                if query.isEmpty {
+                    Section {
+                        Button { showingSuggestions = true } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "gift.fill").foregroundStyle(Theme.Colors.missed)
+                                Text(suggestionsLine)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Theme.Colors.ink)
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.Colors.inkSoft)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(PressableStyle())
+                        .listRowBackground(Theme.Colors.card)
+                    }
                 }
 
                 ForEach(sections) { section in
@@ -60,7 +80,7 @@ struct UpcomingView: View {
                     ContentUnavailableView(
                         "No birthdays yet",
                         systemImage: "gift",
-                        description: Text("Add birthdays to your contacts, or check Suggestions for ones in your calendar.")
+                        description: Text("Add birthdays to your contacts, or find ones in your calendar above.")
                     )
                     .foregroundStyle(Theme.Colors.inkSoft)
                 }
@@ -73,11 +93,20 @@ struct UpcomingView: View {
             .refreshable { await model.reload() }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
+                    Button { showingStats = true } label: { Image(systemName: "chart.bar.fill") }
+                        .accessibilityLabel("Stats")
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button { adding = true } label: { Image(systemName: "plus") }
                         .accessibilityLabel("Add a birthday or anniversary")
                 }
             }
             .sheet(isPresented: $adding) { AddOccasionView() }
+            .sheet(isPresented: $showingStats) { StatsView().presentationDragIndicator(.visible) }
+            .sheet(isPresented: $showingSuggestions) { SuggestionsView().presentationDragIndicator(.visible) }
+            .task {
+                if CalendarScanner.hasAccess, !model.hasScannedCalendar { await model.scanCalendar() }
+            }
             .safeAreaInset(edge: .bottom) {
                 if let muted = model.justMuted {
                     HStack {
@@ -99,6 +128,15 @@ struct UpcomingView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: model.justMuted?.id)
+        }
+    }
+
+    private var suggestionsLine: String {
+        guard model.hasScannedCalendar else { return "Find birthdays in your calendar" }
+        switch model.suggestions.count {
+        case 0: return "Your calendar's birthdays are all in Contacts"
+        case 1: return "1 birthday found in your calendar"
+        case let n: return "\(n) birthdays found in your calendar"
         }
     }
 

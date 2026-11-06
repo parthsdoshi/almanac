@@ -43,7 +43,8 @@ targets:
           - AlmanacDisplay-SemiBoldItalic.ttf
         ITSAppUsesNonExemptEncryption: false   # HTTPS only, so TestFlight skips the export compliance question
         NSContactsUsageDescription: "Shebang#! reads birthdays and anniversaries from your contacts, and saves birthdays you choose to add from your calendar."
-        NSCalendarsFullAccessUsageDescription: "Shebang#! looks through your calendar for birthday events that aren't in your contacts yet."
+        NSRemindersFullAccessUsageDescription: "Shebang#! adds the to-dos you jot to Apple Reminders and shows today's on the Today screen."
+        NSCalendarsFullAccessUsageDescription: "Shebang#! looks through your calendar for birthday events that aren't in your contacts yet, and shows today's events on the Today screen."
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [occasions.refresh]
         CFBundleURLTypes:

@@ -5,7 +5,7 @@ name: Build
 
 on:
   push:
-    branches: [main, widget, feedback]
+    branches: [main, widget, feedback, hub]
   pull_request:
   workflow_dispatch:
 
@@ -35,4 +35,14 @@ jobs:
             -project Occasions.xcodeproj \
             -scheme Occasions \
             -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run the tests on a Simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(x["udid"] for k,v in d.items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
+          echo "Testing on $UDID"
+          xcodebuild test \
+            -project Occasions.xcodeproj \
+            -scheme Occasions \
+            -destination "id=$UDID" \
             CODE_SIGNING_ALLOWED=NO

@@ -49,6 +49,8 @@ struct OccasionDetailView: View {
                     }
                 }
 
+                PersonNotesCard(item: item)
+
                 let history = model.actions(for: o.id)
                 if !history.isEmpty {
                     VStack(alignment: .leading, spacing: Theme.Spacing.m) {

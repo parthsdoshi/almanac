@@ -78,10 +78,10 @@ struct UpcomingItem: Identifiable, Hashable {
 final class AppModel {
     static let shared = AppModel()
 
-    enum Tab: Hashable { case upcoming, stats, suggestions, settings }
+    enum Tab: Hashable { case today, upcoming, workouts, notes, settings }
 
     // UI state
-    var selectedTab: Tab = .upcoming
+    var selectedTab: Tab = .today
     var upcomingPath: [String] = []
     var composeRequest: ComposeRequest?
     var callChoice: CallChoice?
@@ -474,16 +474,21 @@ final class AppModel {
         upcomingPath = [occasionID]
     }
 
-    func beginMessage(_ o: Occasion) {
+    /// The text from your template, before any drafting.
+    func templateMessage(_ o: Occasion) -> String {
+        let template = o.kind == .birthday ? settings.birthdayTemplate : settings.anniversaryTemplate
+        return template
+            .replacingOccurrences(of: "{name}", with: o.firstNames.first ?? "")
+            .replacingOccurrences(of: "{names}", with: Names.join(o.firstNames))
+    }
+
+    func beginMessage(_ o: Occasion, body custom: String? = nil) {
         let recipients = o.people.compactMap(\.phoneNumbers.first)
         guard !recipients.isEmpty else {
             alertMessage = "No phone number for \(Names.join(o.firstNames))."
             return
         }
-        let template = o.kind == .birthday ? settings.birthdayTemplate : settings.anniversaryTemplate
-        let body = template
-            .replacingOccurrences(of: "{name}", with: o.firstNames.first ?? "")
-            .replacingOccurrences(of: "{names}", with: Names.join(o.firstNames))
+        let body = custom ?? templateMessage(o)
         let day = StatsCalculator.instanceDay(for: o, actingAt: .now, calendar: calendar)
 
         if MFMessageComposeViewController.canSendText() {

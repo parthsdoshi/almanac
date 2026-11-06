@@ -2,24 +2,35 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(HubStore.self) private var hub
+    @Environment(WorkoutUI.self) private var workouts
 
     var body: some View {
         @Bindable var model = model
         Group {
             if model.contactsAccess.canRead {
                 TabView(selection: $model.selectedTab) {
+                    TodayView()
+                        .tabItem { Label("Today", systemImage: "sun.max.fill") }
+                        .tag(AppModel.Tab.today)
                     UpcomingView()
                         .tabItem { Label("Upcoming", systemImage: "calendar") }
                         .tag(AppModel.Tab.upcoming)
-                    StatsView()
-                        .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
-                        .tag(AppModel.Tab.stats)
-                    SuggestionsView()
-                        .tabItem { Label("Suggestions", systemImage: "sparkles") }
-                        .tag(AppModel.Tab.suggestions)
+                    WorkoutsView()
+                        .tabItem { Label("Workouts", systemImage: "dumbbell.fill") }
+                        .tag(AppModel.Tab.workouts)
+                    NotesView()
+                        .tabItem { Label("Notes", systemImage: "note.text") }
+                        .tag(AppModel.Tab.notes)
                     SettingsView()
                         .tabItem { Label("Settings", systemImage: "gearshape") }
                         .tag(AppModel.Tab.settings)
+                }
+                .fullScreenCover(isPresented: Binding(get: { workouts.isPresented }, set: { _ in })) {
+                    WorkoutCover()
+                        .environment(model)
+                        .environment(hub)
+                        .environment(workouts)
                 }
                 .overlay { ConfettiBurst(trigger: model.celebrations).ignoresSafeArea() }
             } else {

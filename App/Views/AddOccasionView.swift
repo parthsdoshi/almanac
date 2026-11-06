@@ -4,6 +4,8 @@ import SwiftUI
 struct AddOccasionView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    /// A line typed elsewhere (Today's capture), read as soon as the sheet opens.
+    var initialText: String? = nil
 
     @State private var kind: OccasionKind = .birthday
     @State private var contact: ContactSnapshot?
@@ -56,6 +58,12 @@ struct AddOccasionView: View {
                     Text(quickNote ?? "Say who, when, and birthday or anniversary. The rest of this form fills in.")
                 }
                 .listRowBackground(Theme.Colors.card)
+                .onAppear {
+                    if let t = initialText, quick.isEmpty {
+                        quick = t
+                        fill()
+                    }
+                }
 
                 Section {
                     Picker("Kind", selection: $kind) {

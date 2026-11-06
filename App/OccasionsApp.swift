@@ -6,6 +6,8 @@ struct OccasionsApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @State private var model = AppModel.shared
+    @State private var hub = HubStore.shared
+    @State private var workouts = WorkoutUI.shared
 
     init() {
         Appearance.apply()
@@ -15,6 +17,8 @@ struct OccasionsApp: App {
         WindowGroup {
             RootView()
                 .environment(model)
+                .environment(hub)
+                .environment(workouts)
                 .task { await model.start() }
                 .onOpenURL { url in Task { await model.handle(url: url) } }
                 .onChange(of: scenePhase) { _, phase in
