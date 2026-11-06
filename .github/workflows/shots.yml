@@ -5,7 +5,7 @@ name: Screenshots
 
 on:
   push:
-    branches: [ios27]
+    branches: [ios27, workout-live]
   workflow_dispatch:
 
 concurrency:
