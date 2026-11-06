@@ -19,11 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Xcode 27.2
+      - name: Use Xcode 27.1
         run: |
-          X=/Applications/Xcode_27.2.app
+          # 27.1, not 27.2: the 27.2 tools call into parts of iOS that 27.2 betas lack (build 12 crashed on launch).
+          X=/Applications/Xcode_27.1.app
           [ -d "$X" ] || X=$(ls -d /Applications/Xcode_27*.app | grep -v -i -E "beta|candidate" | sort -V | tail -1)
           sudo xcode-select -s "$X/Contents/Developer"
+          ls -la /Applications | grep -i xcode
           xcodebuild -version
 
       - name: Check secrets are set
