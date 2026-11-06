@@ -73,6 +73,14 @@ struct OccasionDetailView: View {
                 ActionButton(title: "Mute forever", systemImage: Theme.Icons.mute, style: .destructive) {
                     confirmingMute = true
                 }
+                // Attached to the button so iOS 26 anchors the dialog here, not at the top of the screen.
+                .confirmationDialog("Mute \(o.title)?", isPresented: $confirmingMute, titleVisibility: .visible) {
+                    Button("Mute forever", role: .destructive) {
+                        Task { await model.mute(occasionID: o.id) }
+                    }
+                } message: {
+                    Text("No more reminders or Live Activities for this. You can unmute it in Settings.")
+                }
             }
             .padding(Theme.Spacing.l)
         }
@@ -103,13 +111,6 @@ struct OccasionDetailView: View {
         )) { sheet in
             ContactCardSheet(contactID: sheet.id) { openContactID = nil }
                 .ignoresSafeArea()
-        }
-        .confirmationDialog("Mute \(o.title)?", isPresented: $confirmingMute, titleVisibility: .visible) {
-            Button("Mute forever", role: .destructive) {
-                Task { await model.mute(occasionID: o.id) }
-            }
-        } message: {
-            Text("No more reminders or Live Activities for this. You can unmute it in Settings.")
         }
     }
 }
