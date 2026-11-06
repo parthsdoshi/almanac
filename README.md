@@ -101,7 +101,7 @@ A cron job can't receive the app's uploads, and Render cron jobs can't have a di
 One-time setup:
 
 1. **Register the bundle ID.** developer.apple.com > Identifiers > + > App IDs. Use your `APP_BUNDLE_ID` and tick **Push Notifications**. (Building once from Xcode with Automatic signing does this too.)
-2. **Create the app in App Store Connect.** appstoreconnect.apple.com > Apps > + > New App: iOS, any name that's free (the home-screen name stays "Occasions"), pick that bundle ID, any SKU.
+2. **Create the app in App Store Connect.** appstoreconnect.apple.com > Apps > + > New App: iOS, Almanac (or any name that's free), pick that bundle ID, any SKU.
 3. **Make an App Store Connect API key.** App Store Connect > Users and Access > Integrations > App Store Connect API > +. Give it the **Admin** role, because cloud signing has to create a distribution certificate. Download the `.p8` (only once) and note the **Key ID** and the **Issuer ID** at the top of the page. This is a different key from the APNs one.
 4. **Add repo secrets** in GitHub > Settings > Secrets and variables > Actions:
 
