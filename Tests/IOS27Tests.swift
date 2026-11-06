@@ -4,10 +4,6 @@ import Testing
 #if canImport(Evaluations)
 import Evaluations
 #endif
-#if canImport(AppIntentsTesting)
-import AppIntents
-import AppIntentsTesting
-#endif
 
 // MARK: Photo Jot guards (every iOS)
 
@@ -118,30 +114,5 @@ struct JotSplitEvaluation: Evaluation {
 }
 #endif
 
-// MARK: AppIntentsTesting (iOS 27.2): Siri's view of the app
-
-#if canImport(AppIntentsTesting)
-@Suite(.serialized) struct SiriIntentTests {
-    @available(iOS 27.2, *)
-    private var definitions: IntentDefinitions {
-        IntentDefinitions(bundleIdentifier: Bundle.main.bundleIdentifier ?? "")
-    }
-
-    @Test func jotSavesANoteAndSiriCanFindIt() async throws {
-        guard #available(iOS 27.2, *) else { return }  // needs the iOS 27.2 Simulator
-        let line = "pasta maker for the kitchen \(UUID().uuidString.prefix(6))"
-        let result = try await definitions.intents["JotIntent"].makeIntent(text: line).run()
-        let said: String = try result.value
-        #expect(said == "Saved it as a note.")
-
-        let notes = try await definitions.entities["NoteEntity"].entities(matching: "pasta maker")
-        #expect(!notes.isEmpty)
-    }
-
-    @Test func occasionsAnswerQueries() async throws {
-        guard #available(iOS 27.2, *) else { return }  // needs the iOS 27.2 Simulator
-        // A fresh Simulator has no contacts, so this checks the query runs, not what it finds.
-        _ = try await definitions.entities["OccasionEntity"].suggestedEntities()
-    }
-}
-#endif
+// Siri's view of the app (AppIntentsTesting) is checked from UITests/SiriIntentTests.swift,
+// because the intents have to run in the app, not inside this test bundle.
