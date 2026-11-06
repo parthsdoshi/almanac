@@ -171,7 +171,7 @@ struct OccasionRow: View {
             DateChip(date: item.nextDate, kind: item.occasion.kind)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 5) {
-                    Text(Names.join(item.occasion.firstNames))
+                    Text(item.occasion.fullNames)
                         .font(Theme.Typography.rowTitle)
                         .foregroundStyle(Theme.Colors.ink)
                     if item.starred {
@@ -278,11 +278,11 @@ struct TodayCard: View {
     }
 
     private var headline: String {
-        let who = Names.join(item.occasion.firstNames)
+        let who = item.occasion.fullNames
         switch (kind, item.years) {
         case (.birthday, let y?): return "\(who) turns \(y)"
         case (.anniversary, let y?): return "\(who): \(y) years"
-        default: return item.occasion.title
+        default: return Names.headline(kind: kind, names: [who])
         }
     }
 }

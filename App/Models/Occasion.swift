@@ -61,6 +61,17 @@ struct Occasion: Identifiable, Hashable, Sendable {
     var firstNames: [String] { people.map(\.firstName) }
     var title: String { Names.headline(kind: kind, names: firstNames) }
 
+    /// Full names for lists: "Priya Patel", "Rohan & Anika Shah" when a couple
+    /// shares a last name, else "Rohan Shah & Anika Patel".
+    var fullNames: String {
+        let families = Set(people.map(\.familyName))
+        if people.count > 1, families.count == 1, let family = families.first, !family.isEmpty,
+           people.allSatisfy({ !$0.givenName.isEmpty }) {
+            return Names.join(people.map(\.givenName)) + " " + family
+        }
+        return Names.join(people.map(\.fullName))
+    }
+
     /// Stable and opaque: a hash of the kind and contact identifiers. The date is
     /// deliberately left out so editing a birthday keeps its mute and stats.
     /// The server only ever sees this hash, never contact identifiers.

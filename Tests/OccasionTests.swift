@@ -322,3 +322,14 @@ private func contact(
         #expect(!item("A", "B", month: 1, day: 1).matches("starred", calendar: english))
     }
 }
+
+@Suite struct FullNamesTests {
+    private func p(_ g: String, _ f: String) -> Person { Person(contactID: g + f, givenName: g, familyName: f, phoneNumbers: []) }
+
+    @Test func singleAndCouples() {
+        #expect(Occasion(kind: .birthday, people: [p("Priya", "Patel")], date: MonthDay(month: 1, day: 2)).fullNames == "Priya Patel")
+        #expect(Occasion(kind: .anniversary, people: [p("Rohan", "Shah"), p("Anika", "Shah")], date: MonthDay(month: 1, day: 2)).fullNames == "Rohan & Anika Shah")
+        #expect(Occasion(kind: .anniversary, people: [p("Rohan", "Shah"), p("Anika", "Patel")], date: MonthDay(month: 1, day: 2)).fullNames == "Rohan Shah & Anika Patel")
+        #expect(Occasion(kind: .birthday, people: [p("Cher", "")], date: MonthDay(month: 1, day: 2)).fullNames == "Cher")
+    }
+}
