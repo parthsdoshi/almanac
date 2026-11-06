@@ -153,6 +153,49 @@ struct ContactsService {
         try store.execute(request)
     }
 
+    /// Sets a birthday (with the year when known) on an existing contact, replacing any.
+    func setBirthday(_ date: MonthDay, includingYear: Bool, contactID: String) throws {
+        let contact = try store.unifiedContact(
+            withIdentifier: contactID,
+            keysToFetch: [CNContactBirthdayKey as CNKeyDescriptor]
+        )
+        guard let mutable = contact.mutableCopy() as? CNMutableContact else { return }
+        mutable.birthday = DateComponents(year: includingYear ? date.year : nil, month: date.month, day: date.day)
+        let request = CNSaveRequest()
+        request.update(mutable)
+        try store.execute(request)
+    }
+
+    /// Adds an anniversary date to an existing contact.
+    func addAnniversary(_ date: MonthDay, contactID: String) throws {
+        let contact = try store.unifiedContact(
+            withIdentifier: contactID,
+            keysToFetch: [CNContactDatesKey as CNKeyDescriptor]
+        )
+        guard let mutable = contact.mutableCopy() as? CNMutableContact else { return }
+        let value = DateComponents(year: date.year, month: date.month, day: date.day) as NSDateComponents
+        mutable.dates.append(CNLabeledValue(label: CNLabelDateAnniversary, value: value))
+        let request = CNSaveRequest()
+        request.update(mutable)
+        try store.execute(request)
+    }
+
+    /// Creates a contact with a name and either a birthday or an anniversary.
+    func createContact(name: String, kind: OccasionKind, date: MonthDay) throws {
+        let parts = name.split(separator: " ", maxSplits: 1).map(String.init)
+        let contact = CNMutableContact()
+        contact.givenName = parts.first ?? name
+        contact.familyName = parts.count > 1 ? parts[1] : ""
+        let components = DateComponents(year: date.year, month: date.month, day: date.day)
+        switch kind {
+        case .birthday: contact.birthday = components
+        case .anniversary: contact.dates = [CNLabeledValue(label: CNLabelDateAnniversary, value: components as NSDateComponents)]
+        }
+        let request = CNSaveRequest()
+        request.add(contact, toContainerWithIdentifier: nil)
+        try store.execute(request)
+    }
+
     /// Creates a new contact with just a name and a year-less birthday.
     func createContact(name: String, birthday: MonthDay) throws {
         let parts = name.split(separator: " ", maxSplits: 1).map(String.init)

@@ -391,7 +391,8 @@ final class AppModel {
         // Message templates don't affect schedules, so don't resync on every keystroke.
         guard settings.leadDays != before.leadDays
             || settings.sendHour != before.sendHour
-            || settings.includeAnniversaries != before.includeAnniversaries else { return }
+            || settings.includeAnniversaries != before.includeAnniversaries
+            || settings.giftLeadDays != before.giftLeadDays else { return }
         Task {
             if settings.includeAnniversaries != before.includeAnniversaries {
                 await reload()
@@ -547,6 +548,29 @@ final class AppModel {
             await reload()
         } catch {
             alertMessage = "Couldn't save to Contacts: \(error.localizedDescription)"
+        }
+    }
+
+    /// Adds a birthday or anniversary from the app. It's saved into Contacts, so
+    /// Contacts stays the one source and it syncs to your other devices.
+    func addOccasion(kind: OccasionKind, date: MonthDay, contactID: String?, newName: String) async -> Bool {
+        do {
+            if let id = contactID {
+                switch kind {
+                case .birthday: try contacts.setBirthday(date, includingYear: date.year != nil, contactID: id)
+                case .anniversary: try contacts.addAnniversary(date, contactID: id)
+                }
+            } else {
+                try contacts.createContact(name: newName, kind: kind, date: date)
+            }
+            if kind == .anniversary, !settings.includeAnniversaries {
+                updateSettings { $0.includeAnniversaries = true }
+            }
+            await reload()
+            return true
+        } catch {
+            alertMessage = "Couldn't save to Contacts: \(error.localizedDescription)"
+            return false
         }
     }
 
