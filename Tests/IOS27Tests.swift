@@ -118,17 +118,17 @@ struct JotSplitEvaluation: Evaluation {
 }
 #endif
 
-// MARK: AppIntentsTesting (iOS 27): Siri's view of the app
+// MARK: AppIntentsTesting (iOS 27.2): Siri's view of the app
 
 #if canImport(AppIntentsTesting)
 @Suite(.serialized) struct SiriIntentTests {
-    @available(iOS 27.0, *)
+    @available(iOS 27.2, *)
     private var definitions: IntentDefinitions {
         IntentDefinitions(bundleIdentifier: Bundle.main.bundleIdentifier ?? "")
     }
 
     @Test func jotSavesANoteAndSiriCanFindIt() async throws {
-        guard #available(iOS 27.0, *) else { return }
+        guard #available(iOS 27.2, *) else { return }  // needs the iOS 27.2 Simulator
         let line = "pasta maker for the kitchen \(UUID().uuidString.prefix(6))"
         let result = try await definitions.intents["JotIntent"].makeIntent(text: line).run()
         let said: String = try result.value
@@ -139,7 +139,7 @@ struct JotSplitEvaluation: Evaluation {
     }
 
     @Test func occasionsAnswerQueries() async throws {
-        guard #available(iOS 27.0, *) else { return }
+        guard #available(iOS 27.2, *) else { return }  // needs the iOS 27.2 Simulator
         // A fresh Simulator has no contacts, so this checks the query runs, not what it finds.
         _ = try await definitions.entities["OccasionEntity"].suggestedEntities()
     }
