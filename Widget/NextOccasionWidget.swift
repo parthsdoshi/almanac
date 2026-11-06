@@ -80,7 +80,29 @@ struct NextOccasionProvider: TimelineProvider {
 
 struct NextOccasionView: View {
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: NextOccasionEntry
+
+    /// The tear-off chip in full color. Tinted and clear home screens flatten its
+    /// colored fills (the text vanished), so there it's plain month-over-day text.
+    @ViewBuilder
+    private func chip(_ date: Date, _ kind: OccasionKind, scale: CGFloat) -> some View {
+        if renderingMode == .fullColor {
+            DateChip(date: date, kind: kind, scale: scale)
+        } else {
+            VStack(spacing: 0) {
+                Text(date.formatted(.dateTime.month(.abbreviated)).uppercased())
+                    .font(.system(size: 9 * scale + 1, weight: .bold))
+                    .widgetAccentable()
+                Text(date.formatted(.dateTime.day()))
+                    .font(Theme.Typography.display(22 * scale, .black))
+                    .monospacedDigit()
+            }
+            .frame(width: 44 * scale)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(kind.label), \(date.formatted(.dateTime.month(.wide).day()))")
+        }
+    }
 
     var body: some View {
         switch family {
@@ -103,7 +125,7 @@ struct NextOccasionView: View {
         if let next = entry.upcoming.first {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top) {
-                    DateChip(date: next.date, kind: next.item.kind, scale: 1.05)
+                    chip(next.date, next.item.kind, scale: 1.05)
                     Spacer(minLength: 0)
                     Image(systemName: Theme.Icons.symbol(for: next.item.kind))
                         .font(.caption)
@@ -141,7 +163,7 @@ struct NextOccasionView: View {
                 ForEach(entry.upcoming) { u in
                     Link(destination: DeepLink.url(occasionID: u.item.id, action: .open)) {
                         HStack(spacing: 10) {
-                            DateChip(date: u.date, kind: u.item.kind, scale: 0.72)
+                            chip(u.date, u.item.kind, scale: 0.72)
                             Text(u.item.names)
                                 .font(Theme.Typography.display(16, .bold))
                                 .foregroundStyle(Theme.Colors.ink)
