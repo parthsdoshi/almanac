@@ -2,6 +2,7 @@ import SwiftUI
 
 struct UpcomingView: View {
     @Environment(AppModel.self) private var model
+    @State private var adding = false
 
     private struct DaySection: Identifiable {
         let id: String
@@ -66,6 +67,13 @@ struct UpcomingView: View {
                 OccasionDetailView(occasionID: id)
             }
             .refreshable { await model.reload() }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { adding = true } label: { Image(systemName: "plus") }
+                        .accessibilityLabel("Add a birthday or anniversary")
+                }
+            }
+            .sheet(isPresented: $adding) { AddOccasionView() }
             .safeAreaInset(edge: .bottom) {
                 if let muted = model.justMuted {
                     HStack {
