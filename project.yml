@@ -70,7 +70,7 @@ targets:
     dependencies:
       - target: OccasionsWidget
     scheme:
-      testTargets: [OccasionsTests]
+      testTargets: [OccasionsTests, OccasionsUITests]
   OccasionsWidget:
     type: app-extension
     platform: iOS
@@ -109,5 +109,19 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).tests
         GENERATE_INFOPLIST_FILE: YES
-        # AppIntentsTesting needs iOS 27.2 parts; weak links let the bundle load on older Simulators, where those tests skip.
+  OccasionsUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: Occasions
+    info:
+      path: UITests/Info.plist
+      properties:
+        AppBundleID: $(APP_BUNDLE_ID)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).uitests
+        TARGETED_DEVICE_FAMILY: "1"
+        # AppIntentsTesting is iOS 27 only; weak links let the bundle load anywhere, and the tests skip before 27.
         OTHER_LDFLAGS: $(inherited) -weak_framework AppIntentsTesting -weak_framework AppIntentsTypeSupport
