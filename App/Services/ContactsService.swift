@@ -166,22 +166,27 @@ struct ContactsService {
         try store.execute(request)
     }
 
-    /// Adds an anniversary date to an existing contact.
-    func addAnniversary(_ date: MonthDay, contactID: String) throws {
+    /// Adds an anniversary date to an existing contact, and links their spouse
+    /// by name so the app pairs them into one couple entry.
+    func addAnniversary(_ date: MonthDay, contactID: String, spouseName: String? = nil) throws {
         let contact = try store.unifiedContact(
             withIdentifier: contactID,
-            keysToFetch: [CNContactDatesKey as CNKeyDescriptor]
+            keysToFetch: [CNContactDatesKey as CNKeyDescriptor, CNContactRelationsKey as CNKeyDescriptor]
         )
         guard let mutable = contact.mutableCopy() as? CNMutableContact else { return }
         let value = DateComponents(year: date.year, month: date.month, day: date.day) as NSDateComponents
         mutable.dates.append(CNLabeledValue(label: CNLabelDateAnniversary, value: value))
+        if let spouseName, !spouseName.isEmpty,
+           !mutable.contactRelations.contains(where: { $0.value.name == spouseName }) {
+            mutable.contactRelations.append(CNLabeledValue(label: CNLabelContactRelationSpouse, value: CNContactRelation(name: spouseName)))
+        }
         let request = CNSaveRequest()
         request.update(mutable)
         try store.execute(request)
     }
 
     /// Creates a contact with a name and either a birthday or an anniversary.
-    func createContact(name: String, kind: OccasionKind, date: MonthDay) throws {
+    func createContact(name: String, kind: OccasionKind, date: MonthDay, spouseName: String? = nil) throws {
         let parts = name.split(separator: " ", maxSplits: 1).map(String.init)
         let contact = CNMutableContact()
         contact.givenName = parts.first ?? name
@@ -189,7 +194,11 @@ struct ContactsService {
         let components = DateComponents(year: date.year, month: date.month, day: date.day)
         switch kind {
         case .birthday: contact.birthday = components
-        case .anniversary: contact.dates = [CNLabeledValue(label: CNLabelDateAnniversary, value: components as NSDateComponents)]
+        case .anniversary:
+            contact.dates = [CNLabeledValue(label: CNLabelDateAnniversary, value: components as NSDateComponents)]
+            if let spouseName, !spouseName.isEmpty {
+                contact.contactRelations = [CNLabeledValue(label: CNLabelContactRelationSpouse, value: CNContactRelation(name: spouseName))]
+            }
         }
         let request = CNSaveRequest()
         request.add(contact, toContainerWithIdentifier: nil)

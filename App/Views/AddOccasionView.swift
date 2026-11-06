@@ -11,6 +11,8 @@ struct AddOccasionView: View {
     @State private var date = Calendar.current.startOfDay(for: .now)
     @State private var knowsYear = false
     @State private var choosing = false
+    @State private var partner: ContactSnapshot?
+    @State private var choosingPartner = false
     @State private var saving = false
 
     private var monthDay: MonthDay {
@@ -54,6 +56,26 @@ struct AddOccasionView: View {
                 }
                 .listRowBackground(Theme.Colors.card)
 
+                if kind == .anniversary {
+                    Section {
+                        if let partner {
+                            HStack {
+                                Text(ContactChooser.name(partner))
+                                Spacer()
+                                Button("Remove") { self.partner = nil }
+                                    .buttonStyle(.borderless)
+                            }
+                        } else {
+                            Button("Choose their partner") { choosingPartner = true }
+                        }
+                    } header: {
+                        Text("With")
+                    } footer: {
+                        Text("Links them as spouses in Contacts, so it shows as one anniversary for the couple and Message texts both.")
+                    }
+                    .listRowBackground(Theme.Colors.card)
+                }
+
                 Section {
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                     Toggle("I know the year", isOn: $knowsYear)
@@ -83,13 +105,17 @@ struct AddOccasionView: View {
                         Task {
                             let ok = await model.addOccasion(
                                 kind: kind, date: monthDay, contactID: contact?.id,
-                                newName: newName.trimmingCharacters(in: .whitespaces))
+                                newName: newName.trimmingCharacters(in: .whitespaces),
+                                spouseName: kind == .anniversary ? partner.map(ContactChooser.name) : nil)
                             saving = false
                             if ok { dismiss() }
                         }
                     }
                     .disabled(!canSave || saving)
                 }
+            }
+            .sheet(isPresented: $choosingPartner) {
+                ContactChooser(contacts: model.contactChoices) { partner = $0 }
             }
             .sheet(isPresented: $choosing) {
                 ContactChooser(contacts: model.contactChoices) { picked in

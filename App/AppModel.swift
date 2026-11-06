@@ -553,15 +553,15 @@ final class AppModel {
 
     /// Adds a birthday or anniversary from the app. It's saved into Contacts, so
     /// Contacts stays the one source and it syncs to your other devices.
-    func addOccasion(kind: OccasionKind, date: MonthDay, contactID: String?, newName: String) async -> Bool {
+    func addOccasion(kind: OccasionKind, date: MonthDay, contactID: String?, newName: String, spouseName: String? = nil) async -> Bool {
         do {
             if let id = contactID {
                 switch kind {
                 case .birthday: try contacts.setBirthday(date, includingYear: date.year != nil, contactID: id)
-                case .anniversary: try contacts.addAnniversary(date, contactID: id)
+                case .anniversary: try contacts.addAnniversary(date, contactID: id, spouseName: spouseName)
                 }
             } else {
-                try contacts.createContact(name: newName, kind: kind, date: date)
+                try contacts.createContact(name: newName, kind: kind, date: date, spouseName: spouseName)
             }
             if kind == .anniversary, !settings.includeAnniversaries {
                 updateSettings { $0.includeAnniversaries = true }
