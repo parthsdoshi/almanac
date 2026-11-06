@@ -1,0 +1,95 @@
+# Launches the Release build on iOS 27 Simulators, like TestFlight would run it,
+# and pushes any crash reports to the crash-<branch> branch. Needs no secrets.
+name: Crash repro
+
+on:
+  push:
+    branches: [crash-repro, hotfix]
+
+permissions:
+  contents: write
+
+jobs:
+  repro:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Xcode 27.2
+        run: |
+          X=/Applications/Xcode_27.2.app
+          [ -d "$X" ] || X=$(ls -d /Applications/Xcode_27*.app | grep -v -i -E "beta|candidate" | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+          ls -la /Applications | grep -i xcode
+
+      - name: Get the iOS 27.2 Simulator
+        run: |
+          xcodebuild -downloadPlatform iOS -buildVersion 24B114 || xcodebuild -downloadPlatform iOS -buildVersion 27.2 || true
+          xcrun simctl list runtimes
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build Release for the Simulator
+        run: |
+          xcodebuild build \
+            -project Occasions.xcodeproj -scheme Occasions -configuration Release \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath dd \
+            CODE_SIGNING_ALLOWED=NO | tail -3
+
+      - name: Launch on each iOS 27 runtime
+        run: |
+          APP=$(ls -d dd/Build/Products/Release-iphonesimulator/*.app | head -1)
+          BID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist")
+          mkdir -p out
+          printf 'BEGIN:VCARD\nVERSION:3.0\nN:Shah;Priya;;;\nFN:Priya Shah\nBDAY:1991-11-12\nEND:VCARD\nBEGIN:VCARD\nVERSION:3.0\nN:Rivera;Sam;;;\nFN:Sam Rivera\nBDAY:1988-11-19\nEND:VCARD\n' > people.vcf
+          for RT in $(xcrun simctl list runtimes available -j | python3 -c 'import json,re,sys; print("\n".join(x["identifier"] for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS" and re.search(r"SimRuntime\.iOS-\d+-\d+$", x["identifier"])))'); do
+            UDID=""
+            for DT in $(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0]), reverse=True); print("\n".join(x["identifier"] for x in t))'); do
+              UDID=$(xcrun simctl create "Repro" "$DT" "$RT" 2>/dev/null) && break
+            done
+            [ -n "$UDID" ] || { echo "no iPhone for $RT"; continue; }
+            NAME=$(echo "$RT" | sed 's/.*SimRuntime\.//')
+            echo "=== $NAME ($UDID)" | tee -a out/summary.txt
+            xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b >/dev/null
+            xcrun simctl addmedia "$UDID" people.vcf || true
+            xcrun simctl install "$UDID" "$APP"
+            # First as a new install, then with Contacts allowed, like an existing user.
+            for pass in fresh contacts; do
+              if [ $pass = contacts ]; then
+                xcrun simctl privacy "$UDID" grant contacts "$BID" || true
+                xcrun simctl privacy "$UDID" grant reminders "$BID" || true
+                xcrun simctl privacy "$UDID" grant calendar "$BID" || true
+              fi
+              xcrun simctl terminate "$UDID" "$BID" 2>/dev/null || true
+              xcrun simctl launch --console-pty "$UDID" "$BID" > "out/$NAME-$pass-console.txt" 2>&1 &
+              LP=$!
+              sleep 12
+              xcrun simctl io "$UDID" screenshot "out/$NAME-$pass.png" || true
+              # Background and come back, which runs the Spotlight indexing.
+              xcrun simctl launch "$UDID" com.apple.Preferences >/dev/null 2>&1 || true
+              sleep 6
+              xcrun simctl launch "$UDID" "$BID" >/dev/null 2>&1 || true
+              sleep 6
+              if xcrun simctl spawn "$UDID" launchctl list | grep -q "$BID"; then echo "$pass: running" | tee -a out/summary.txt; else echo "$pass: NOT running" | tee -a out/summary.txt; fi
+              kill $LP 2>/dev/null || true
+            done
+            xcrun simctl spawn "$UDID" log show --last 5m --predicate 'process == "Occasions" OR eventMessage CONTAINS[c] "Occasions"' --style compact 2>/dev/null | tail -300 > "out/$NAME-log.txt" || true
+            xcrun simctl shutdown "$UDID" || true
+          done
+          cp ~/Library/Logs/DiagnosticReports/Occasions* out/ 2>/dev/null || true
+          find ~/Library/Logs/DiagnosticReports -name "*Occasions*" -newer people.vcf -exec cp {} out/ \; 2>/dev/null || true
+          ls -la out; cat out/summary.txt
+
+      - name: Push the results
+        if: always()
+        run: |
+          cd out
+          git init -q
+          git checkout -q -b "crash-${GITHUB_REF_NAME}"
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Crash repro of ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "HEAD:crash-${GITHUB_REF_NAME}"
