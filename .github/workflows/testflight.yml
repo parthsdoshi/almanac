@@ -62,6 +62,15 @@ jobs:
           brew install xcodegen
           xcodegen generate
 
+      - name: Revoke development certificates left by earlier runs
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          AUTH_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography || python3 -m pip install --quiet pyjwt cryptography
+          python3 ci/revoke_ci_certs.py
+
       - name: Archive
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
