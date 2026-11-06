@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="A cream starburst stamp on red with a bold hash bang in the middle">
+<rect width="1024" height="1024" fill="#E8462F"/>
+<g transform="rotate(-10 512 512)">
+<polygon transform="translate(18 22)" fill="#A9281A" points="512,102 562,164 628,119 658,192 734,167 743,246 822,244 808,322 885,342 850,413 918,454 864,512 918,570 850,611 885,682 808,702 822,780 743,778 734,857 658,832 628,905 562,860 512,922 462,860 396,905 366,832 290,857 281,778 202,780 216,702 139,682 174,611 106,570 160,512 106,454 174,413 139,342 216,322 202,244 281,246 290,167 366,192 396,119 462,164"/>
+<polygon fill="#FFF4DE" stroke="#2B2118" stroke-width="18" stroke-linejoin="round" points="512,102 562,164 628,119 658,192 734,167 743,246 822,244 808,322 885,342 850,413 918,454 864,512 918,570 850,611 885,682 808,702 822,780 743,778 734,857 658,832 628,905 562,860 512,922 462,860 396,905 366,832 290,857 281,778 202,780 216,702 139,682 174,611 106,570 160,512 106,454 174,413 139,342 216,322 202,244 281,246 290,167 366,192 396,119 462,164"/>
+<circle cx="512" cy="512" r="318" fill="none" stroke="#2B2118" stroke-width="6" stroke-dasharray="4 18" stroke-linecap="round"/>
+</g>
+<g transform="translate(430 500) skewX(-8) translate(-430 -500)" fill="#2B2118">
+<rect x="330" y="300" width="62" height="400" rx="31"/>
+<rect x="450" y="300" width="62" height="400" rx="31"/>
+<rect x="252" y="420" width="358" height="62" rx="31"/>
+<rect x="252" y="556" width="358" height="62" rx="31"/>
+</g>
+<g transform="rotate(9 710 500)" fill="#FFCF3F" stroke="#2B2118" stroke-width="14" stroke-linejoin="round">
+<path d="M652 300 Q710 284 768 300 L744 598 Q710 616 676 598 Z"/>
+<circle cx="710" cy="690" r="54"/>
+</g>
+</svg>
