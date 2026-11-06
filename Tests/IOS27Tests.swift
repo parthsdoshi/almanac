@@ -122,6 +122,7 @@ struct JotSplitEvaluation: Evaluation {
 
 #if canImport(AppIntentsTesting)
 @Suite(.serialized) struct SiriIntentTests {
+    @available(iOS 27.0, *)
     private var definitions: IntentDefinitions {
         IntentDefinitions(bundleIdentifier: Bundle.main.bundleIdentifier ?? "")
     }
