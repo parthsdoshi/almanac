@@ -287,3 +287,38 @@ private func contact(
         #expect(snap.upcoming(from: day(2027, 2, 1), limit: 1, calendar: cal).first?.daysUntil == 27)
     }
 }
+
+@Suite struct UpcomingSearchTests {
+    private func item(_ given: String, _ family: String, kind: OccasionKind = .birthday, month: Int, day: Int, starred: Bool = false) -> UpcomingItem {
+        let person = Person(contactID: given, givenName: given, familyName: family, phoneNumbers: [])
+        let occasion = Occasion(kind: kind, people: [person], date: MonthDay(month: month, day: day))
+        return UpcomingItem(occasion: occasion, nextDate: .now, daysUntil: 3, years: nil, starred: starred)
+    }
+
+    private var english: Calendar {
+        var c = Calendar(identifier: .gregorian)
+        c.locale = Locale(identifier: "en_US")
+        return c
+    }
+
+    @Test func matchesNamesWithoutCaseOrAccents() {
+        let jose = item("José", "Álvarez", month: 3, day: 14)
+        #expect(jose.matches("jose", calendar: english))
+        #expect(jose.matches("ALV", calendar: english))
+        #expect(!jose.matches("maria", calendar: english))
+    }
+
+    @Test func matchesMonthsDatesAndKinds() {
+        let a = item("Rohan", "Shah", kind: .anniversary, month: 3, day: 14)
+        #expect(a.matches("mar", calendar: english))
+        #expect(a.matches("march 14", calendar: english))
+        #expect(a.matches("3/14", calendar: english))
+        #expect(a.matches("anniv rohan", calendar: english))
+        #expect(!a.matches("birthday", calendar: english))
+    }
+
+    @Test func starredFilter() {
+        #expect(item("A", "B", month: 1, day: 1, starred: true).matches("starred", calendar: english))
+        #expect(!item("A", "B", month: 1, day: 1).matches("starred", calendar: english))
+    }
+}

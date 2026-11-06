@@ -3,6 +3,7 @@ import SwiftUI
 struct UpcomingView: View {
     @Environment(AppModel.self) private var model
     @State private var adding = false
+    @State private var query = ""
 
     private struct DaySection: Identifiable {
         let id: String
@@ -53,7 +54,9 @@ struct UpcomingView: View {
             .listRowSeparatorTint(Theme.Colors.rule)
             .paperBackground()
             .overlay {
-                if model.upcoming.isEmpty {
+                if !query.isEmpty && sections.isEmpty {
+                    ContentUnavailableView.search(text: query)
+                } else if model.upcoming.isEmpty {
                     ContentUnavailableView(
                         "No birthdays yet",
                         systemImage: "gift",
@@ -63,6 +66,7 @@ struct UpcomingView: View {
                 }
             }
             .tabScreen("Upcoming")
+            .searchable(text: $query, prompt: "Names, months, dates")
             .navigationDestination(for: String.self) { id in
                 OccasionDetailView(occasionID: id)
             }
@@ -102,7 +106,7 @@ struct UpcomingView: View {
         let groups: [(String, ClosedRange<Int>)] = [
             ("Today", 0...0), ("This week", 1...7), ("This month", 8...31), ("Later", 32...366),
         ]
-        let items = model.upcoming
+        let items = query.isEmpty ? model.upcoming : model.upcoming.filter { $0.matches(query) }
         return groups.compactMap { title, range in
             let matching = items.filter { range.contains($0.daysUntil) }
             return matching.isEmpty ? nil : DaySection(id: title, items: matching)

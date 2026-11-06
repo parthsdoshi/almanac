@@ -46,6 +46,31 @@ struct UpcomingItem: Identifiable, Hashable {
     /// for the same person that aren't linked.
     var possibleDuplicate = false
     var starred = false
+
+    /// Search on Upcoming. Every word has to match something: a name, the kind
+    /// ("birthday", "anniversary"), a month ("mar", "march"), a date ("3/14",
+    /// "14"), or "starred". Case and accents don't matter.
+    func matches(_ query: String, calendar: Calendar = .current) -> Bool {
+        let words = query.split(whereSeparator: \.isWhitespace).map { Self.fold(String($0)) }
+        guard !words.isEmpty else { return true }
+        let names = occasion.people.flatMap { [$0.givenName, $0.familyName] }.map(Self.fold).filter { !$0.isEmpty }
+        let kind = Self.fold(occasion.kind.rawValue)
+        let symbols = calendar.monthSymbols.map(Self.fold)
+        let month = symbols.indices.contains(occasion.date.month - 1) ? symbols[occasion.date.month - 1] : ""
+        let numeric = "\(occasion.date.month)/\(occasion.date.day)"
+        return words.allSatisfy { word in
+            if names.contains(where: { $0.hasPrefix(word) }) { return true }
+            if kind.hasPrefix(word) || (word == "anniv" && occasion.kind == .anniversary) || (word == "bday" && occasion.kind == .birthday) { return true }
+            if word.count >= 3, month.hasPrefix(word) { return true }
+            if word == numeric || word == String(occasion.date.day) { return true }
+            if "starred".hasPrefix(word), word.count >= 4, starred { return true }
+            return false
+        }
+    }
+
+    private static func fold(_ s: String) -> String {
+        s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil).lowercased()
+    }
 }
 
 @MainActor
