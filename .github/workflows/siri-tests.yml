@@ -1,0 +1,50 @@
+# Runs the Siri intent tests (AppIntentsTesting) against the installed app.
+# They need the iOS 27.2 Simulator, which the runner image doesn't ship, so this
+# downloads it first. Needs no secrets.
+name: Siri tests
+
+on:
+  push:
+    branches: [ios27]
+  workflow_dispatch:
+
+concurrency:
+  group: siri-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  siri:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Xcode 27.2
+        run: |
+          X=/Applications/Xcode_27.2.app
+          [ -d "$X" ] || X=$(ls -d /Applications/Xcode_27*.app | grep -v -i -E "beta|candidate" | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+
+      - name: Get the iOS 27.2 Simulator
+        run: |
+          xcodebuild -downloadPlatform iOS -buildVersion 27.2 || xcodebuild -downloadPlatform iOS
+          xcrun simctl list runtimes
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          sed -i '' 's/testTargets: \[OccasionsTests\]/testTargets: [OccasionsTests, OccasionsUITests]/' project.yml
+          grep -n "testTargets" project.yml
+          xcodegen generate
+
+      - name: Run the Siri tests
+        run: |
+          RT=$(xcrun simctl list runtimes available -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS"]; r.sort(key=lambda x:[int(n) for n in x["version"].split(".")]); print(r[-1]["identifier"])')
+          DT=$(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+ Pro", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0])); print(t[-1]["identifier"])')
+          UDID=$(xcrun simctl create "Siri iPhone" "$DT" "$RT")
+          echo "Runtime $RT, device $UDID"
+          xcodebuild test \
+            -project Occasions.xcodeproj -scheme Occasions \
+            -only-testing:OccasionsUITests \
+            -destination "id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO

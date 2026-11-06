@@ -68,7 +68,7 @@ targets:
     dependencies:
       - target: OccasionsWidget
     scheme:
-      testTargets: [OccasionsTests, OccasionsUITests]
+      testTargets: [OccasionsTests]
   OccasionsWidget:
     type: app-extension
     platform: iOS
@@ -107,6 +107,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).tests
         GENERATE_INFOPLIST_FILE: YES
+  # Siri intent tests (AppIntentsTesting). They need an iOS 27.2 Simulator, so
+  # they run from siri-tests.yml, not with the regular tests.
   OccasionsUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -121,5 +123,3 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).uitests
         TARGETED_DEVICE_FAMILY: "1"
-        # AppIntentsTesting is iOS 27 only; weak links let the bundle load anywhere, and the tests skip before 27.
-        OTHER_LDFLAGS: $(inherited) -weak_framework AppIntentsTesting -weak_framework AppIntentsTypeSupport
