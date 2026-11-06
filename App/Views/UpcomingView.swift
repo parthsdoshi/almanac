@@ -64,6 +64,27 @@ struct UpcomingView: View {
                 OccasionDetailView(occasionID: id)
             }
             .refreshable { await model.reload() }
+            .safeAreaInset(edge: .bottom) {
+                if let muted = model.justMuted {
+                    HStack {
+                        Text("Muted \(muted.title)")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.Colors.ink)
+                            .lineLimit(1)
+                        Spacer()
+                        Button("Undo") { Task { await model.unmute(occasionID: muted.id) } }
+                            .font(.subheadline.weight(.bold))
+                            .tint(Theme.Colors.accent)
+                    }
+                    .padding(.horizontal, Theme.Spacing.l)
+                    .padding(.vertical, Theme.Spacing.m)
+                    .paperCard(radius: Theme.Radius.button)
+                    .padding(.horizontal, Theme.Spacing.l)
+                    .padding(.bottom, Theme.Spacing.s)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: model.justMuted?.id)
         }
     }
 

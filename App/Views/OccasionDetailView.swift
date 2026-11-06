@@ -4,7 +4,6 @@ struct OccasionDetailView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     let occasionID: String
-    @State private var confirmingMute = false
     @State private var openContactID: String?
 
     var body: some View {
@@ -71,15 +70,8 @@ struct OccasionDetailView: View {
                 sourcesCard(item)
 
                 ActionButton(title: "Mute forever", systemImage: Theme.Icons.mute, style: .destructive) {
-                    confirmingMute = true
-                }
-                // Attached to the button so iOS 26 anchors the dialog here, not at the top of the screen.
-                .confirmationDialog("Mute \(o.title)?", isPresented: $confirmingMute, titleVisibility: .visible) {
-                    Button("Mute forever", role: .destructive) {
-                        Task { await model.mute(occasionID: o.id) }
-                    }
-                } message: {
-                    Text("No more reminders or Live Activities for this. You can unmute it in Settings.")
+                    // No confirmation: Upcoming shows an Undo, and Settings can unmute.
+                    Task { await model.mute(occasionID: o.id) }
                 }
             }
             .padding(Theme.Spacing.l)

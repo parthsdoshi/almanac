@@ -63,6 +63,8 @@ final class AppModel {
     var alertMessage: String?
     /// Set from Settings to replay the tour.
     var showTutorial = false
+    /// The occasion you just muted, for the Undo bar on Upcoming.
+    private(set) var justMuted: (id: String, title: String)?
     /// Goes up each time you text or call someone from the app. The confetti burst watches it.
     private(set) var celebrations = 0
 
@@ -404,6 +406,11 @@ final class AppModel {
         if occasions.isEmpty { await reload() }
         let title = occasion(id: occasionID)?.title ?? "Muted occasion"
         store.update { $0.muted[occasionID] = title }
+        justMuted = (occasionID, title)
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(6))
+            if self?.justMuted?.id == occasionID { self?.justMuted = nil }
+        }
         await liveActivities.end(occasionID: occasionID)
         if previewOccasionID == occasionID { previewOccasionID = nil }
         upcomingPath.removeAll { $0 == occasionID }
@@ -411,6 +418,7 @@ final class AppModel {
     }
 
     func unmute(occasionID: String) async {
+        if justMuted?.id == occasionID { justMuted = nil }
         store.update { $0.muted[occasionID] = nil }
         await refreshSchedules()
     }
