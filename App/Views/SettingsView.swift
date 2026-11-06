@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @AppStorage(HealthService.enabledKey) private var saveToHealth = false
+    @AppStorage(CloudSync.enabledKey) private var syncICloud = true
+    private var cloud: CloudSync { .shared }
     @State private var healthNote: String?
 
     var body: some View {
@@ -85,6 +87,27 @@ struct SettingsView: View {
                          : LiveActivityManager.canSchedule
                             ? "Your phone schedules the next few Live Activities for your reminder time. Opening the app now and then keeps them topped up; anything not scheduled gets a notification instead."
                             : "The Live Activity starts when you open the app on the day. On iOS 26 or later it starts by itself at your reminder time.")
+                }
+                .listRowBackground(Theme.Colors.card)
+
+                Section {
+                    Toggle("Sync with iCloud", isOn: Binding(
+                        get: { syncICloud },
+                        set: { syncICloud = $0; cloud.setEnabled($0) }))
+                        .tint(Theme.Colors.acted)
+                    if syncICloud {
+                        if let p = cloud.problem {
+                            Text(p).font(.footnote).foregroundStyle(Theme.Colors.missed)
+                        } else if let t = cloud.lastSynced {
+                            LabeledContent("Last synced", value: t.formatted(date: .omitted, time: .shortened))
+                        } else if !CloudSync.canRun {
+                            Text("Sync runs on a real iPhone.").font(.footnote).foregroundStyle(Theme.Colors.inkSoft)
+                        }
+                    }
+                } header: {
+                    Text("iCloud")
+                } footer: {
+                    Text("Notes, what you know about people, workouts, stars, mutes and these settings stay in step on your devices, in your own iCloud. Birthdays sync through Contacts and to-dos through Reminders already.")
                 }
                 .listRowBackground(Theme.Colors.card)
 

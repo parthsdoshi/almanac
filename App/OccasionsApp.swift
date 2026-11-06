@@ -23,7 +23,10 @@ struct OccasionsApp: App {
                 .onOpenURL { url in Task { await model.handle(url: url) } }
                 .onChange(of: scenePhase) { _, phase in
                     // Picks up contact edits and time zone changes (travel) when you come back.
-                    if phase == .active { Task { await model.reload(); EntityIndexer.shared.indexSoon() } }
+                    if phase == .active {
+                        Task { await model.reload(); EntityIndexer.shared.indexSoon() }
+                        CloudSync.shared.fetchNow()
+                    }
                     // Spotlight and Siri see the notes you wrote this visit.
                     if phase == .background, #available(iOS 18.0, *) { Task { await EntityIndexer.shared.indexAll() } }
                 }
@@ -40,6 +43,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        // iCloud sync hears about changes from your other devices by silent push.
+        application.registerForRemoteNotifications()
         return true
     }
 
