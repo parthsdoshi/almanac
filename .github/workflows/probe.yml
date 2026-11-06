@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-26]
+        os: [xcode-27]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -17,7 +17,7 @@ jobs:
           ls -d /Applications/Xcode*.app || true
       - name: Dump newest SDK interfaces
         run: |
-          X=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
+          X=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | grep -v beta | sort -V | tail -1); [ -z "$X" ] && X=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1); xcodebuild -version || true
           [ -z "$X" ] && X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
           echo "Using $X"
           SDK="$X/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
