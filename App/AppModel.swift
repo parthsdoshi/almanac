@@ -226,7 +226,10 @@ final class AppModel {
     /// Re-reads Contacts and brings notifications, Live Activities and the server up to date.
     func reload() async {
         contactsAccess = ContactsService.currentAccess()
-        guard contactsAccess.canRead else { return }
+        guard contactsAccess.canRead else {
+            CloudSync.shared.contactsDidLoad(occasions: [], contacts: [])
+            return
+        }
         do {
             let (fetched, sources) = try await Task.detached(priority: .userInitiated) {
                 let service = ContactsService()
@@ -237,6 +240,7 @@ final class AppModel {
             var built = OccasionBuilder.build(from: snapshots)
             if !settings.includeAnniversaries { built.removeAll { $0.kind == .anniversary } }
             occasions = built
+            CloudSync.shared.contactsDidLoad(occasions: built, contacts: snapshots)
         } catch {
             alertMessage = "Couldn't read contacts: \(error.localizedDescription)"
             return

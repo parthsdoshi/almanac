@@ -20,6 +20,8 @@ struct PersonNote: Codable, Identifiable, Hashable, Sendable {
     var contactID: String
     var text: String
     var created = Date()
+    /// The person's full name when it was synced, so another phone (with different contact ids) can find them.
+    var personName: String?
 }
 
 /// One logged set. Field names match the web tracker's backup file.
@@ -101,6 +103,8 @@ final class HubStore {
 
     private(set) var state: HubState
     @ObservationIgnored private let url: URL
+    /// Called after every change, for iCloud sync.
+    @ObservationIgnored var onChange: (() -> Void)?
 
     init(url: URL = HubStore.defaultURL()) {
         self.url = url
@@ -117,6 +121,7 @@ final class HubStore {
     func update(_ change: (inout HubState) -> Void) {
         change(&state)
         save()
+        onChange?()
     }
 
     private func save() {

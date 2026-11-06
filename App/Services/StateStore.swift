@@ -11,6 +11,8 @@ final class StateStore {
 
     private(set) var state: PersistedState
     @ObservationIgnored private let url: URL
+    /// Called after every change, for iCloud sync.
+    @ObservationIgnored var onChange: (() -> Void)?
 
     init(url: URL = StateStore.defaultURL()) {
         self.url = url
@@ -28,6 +30,7 @@ final class StateStore {
     func update(_ change: (inout PersistedState) -> Void) {
         change(&state)
         save()
+        onChange?()
     }
 
     private func save() {
