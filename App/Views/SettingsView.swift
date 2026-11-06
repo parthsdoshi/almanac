@@ -118,6 +118,7 @@ struct SettingsView: View {
                 .listRowBackground(Theme.Colors.card)
             }
             .listRowSeparatorTint(Theme.Colors.rule)
+            .contentMargins(.top, 0, for: .scrollContent)   // title lines up with Today's instead of sitting a row lower
             .paperBackground()
             .tabScreen("Settings")
         }
