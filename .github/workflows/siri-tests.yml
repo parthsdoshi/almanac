@@ -1,6 +1,7 @@
 # Runs the Siri intent tests (AppIntentsTesting) against the installed app.
 # They need the iOS 27.2 Simulator, which the runner image doesn't ship, so this
-# downloads it first. Needs no secrets.
+# downloads it first. The app is signed to run locally (ad hoc, no account), because
+# iOS only lets these tests drive a development build. Needs no secrets.
 name: Siri tests
 
 on:
@@ -47,4 +48,4 @@ jobs:
             -project Occasions.xcodeproj -scheme Occasions \
             -only-testing:OccasionsUITests \
             -destination "id=$UDID" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=
