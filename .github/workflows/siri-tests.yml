@@ -4,9 +4,9 @@
 # iOS only lets these tests drive a development build. Needs no secrets.
 name: Siri tests
 
+# Manual for now: on GitHub's runners iOS refuses these tests for an unsigned
+# build, and the runner stalls with a locally signed one. They run from Xcode on a Mac.
 on:
-  push:
-    branches: [ios27]
   workflow_dispatch:
 
 concurrency:
