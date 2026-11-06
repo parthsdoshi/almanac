@@ -21,7 +21,7 @@ jobs:
           "$X/Contents/Developer/usr/bin/xcodebuild" -version > dump/VERSION
           ls "$SDK/System/Library/Frameworks" > dump/frameworks.txt
           ls "$P/Library/Frameworks" > dump/devframeworks.txt
-          for fw in FoundationModels AppIntents WidgetKit SwiftUI Vision CoreSpotlight; do
+          for fw in FoundationModels AppIntents WidgetKit SwiftUI Vision CoreSpotlight _AppIntents_SwiftUI _AppIntents_UIKit _Contacts_AppIntents _CoreSpotlight_FoundationModels _PhotosUI_WidgetKit AppIntentsTypeSupport Contacts; do
             f=$(find "$SDK/System/Library/Frameworks/$fw.framework" -name "arm64e-apple-ios.swiftinterface" | head -1)
             [ -n "$f" ] && cp "$f" "dump/$fw.swiftinterface"
           done
@@ -33,6 +33,7 @@ jobs:
             esac
           done
           ls -la dump
+          ls "$X/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/" > dump/simsdks.txt; xcrun simctl list runtimes > dump/runtimes.txt 2>&1 || true; DEVELOPER_DIR=$X/Contents/Developer xcrun simctl list devicetypes | grep -i iphone > dump/devicetypes.txt || true
       - name: Push dump to sdk-dump branch
         run: |
           git config user.name ci; git config user.email ci@example.invalid
