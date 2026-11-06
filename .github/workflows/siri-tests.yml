@@ -41,8 +41,10 @@ jobs:
       - name: Run the Siri tests
         run: |
           RT=$(xcrun simctl list runtimes available -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x["platform"]=="iOS"]; r.sort(key=lambda x:[int(n) for n in x["version"].split(".")]); print(r[-1]["identifier"])')
-          DT=$(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+ Pro", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0])); print(t[-1]["identifier"])')
-          UDID=$(xcrun simctl create "Siri iPhone" "$DT" "$RT")
+          UDID=""
+          for DT in $(xcrun simctl list devicetypes -j | python3 -c 'import json,re,sys; t=[x for x in json.load(sys.stdin)["devicetypes"] if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; t.sort(key=lambda x:int(re.findall(r"\d+",x["name"])[0]), reverse=True); print("\n".join(x["identifier"] for x in t))'); do
+            UDID=$(xcrun simctl create "Siri iPhone" "$DT" "$RT" 2>/dev/null) && break
+          done
           echo "Runtime $RT, device $UDID"
           xcodebuild test \
             -project Occasions.xcodeproj -scheme Occasions \
