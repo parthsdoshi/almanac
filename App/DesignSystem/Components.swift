@@ -45,6 +45,8 @@ struct ScreenHeader: View {
                 .foregroundStyle(Theme.Colors.ink)
                 .accessibilityAddTraits(.isHeader)
         }
+        .padding(.top, 2)
+        .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -54,7 +56,7 @@ extension View {
     @ViewBuilder
     func screenHeaderRow() -> some View {
         listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: Theme.Spacing.xs, bottom: 0, trailing: 0))
+            .listRowInsets(EdgeInsets(top: Theme.Spacing.s, leading: Theme.Spacing.xs, bottom: 0, trailing: 0))
     }
 
     /// Slim navigation bar for a tab's root screen. The large title used to
