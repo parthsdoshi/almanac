@@ -30,6 +30,7 @@ struct UpcomingView: View {
                                     onCall: { model.beginCall(item.occasion) })
                                 .listRowBackground(Color.clear)
                                 .listRowInsets(EdgeInsets(top: Theme.Spacing.xs, leading: 0, bottom: Theme.Spacing.xs, trailing: 0))
+                                .modifier(RowSwipeActions(item: item))
                             }
                         }
                     } else {
@@ -38,6 +39,7 @@ struct UpcomingView: View {
                                 NavigationLink(value: item.occasion.id) {
                                     OccasionRow(item: item)
                                 }
+                                .modifier(RowSwipeActions(item: item))
                             }
                             .listRowBackground(Theme.Colors.card)
                         } header: {
@@ -97,5 +99,30 @@ struct UpcomingView: View {
             let matching = items.filter { range.contains($0.daysUntil) }
             return matching.isEmpty ? nil : DaySection(id: title, items: matching)
         }
+    }
+}
+
+/// Swipe left to mute (Upcoming shows Undo), swipe right to star.
+private struct RowSwipeActions: ViewModifier {
+    @Environment(AppModel.self) private var model
+    let item: UpcomingItem
+
+    func body(content: Content) -> some View {
+        content
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    Task { await model.mute(occasionID: item.occasion.id) }
+                } label: {
+                    Label("Mute", systemImage: Theme.Icons.mute)
+                }
+            }
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button {
+                    model.toggleStar(item.occasion.id)
+                } label: {
+                    Label(item.starred ? "Unstar" : "Star", systemImage: item.starred ? "star.slash" : "star.fill")
+                }
+                .tint(Theme.Colors.gold)
+            }
     }
 }
