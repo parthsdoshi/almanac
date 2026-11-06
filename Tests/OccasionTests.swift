@@ -333,3 +333,46 @@ private func contact(
         #expect(Occasion(kind: .birthday, people: [p("Cher", "")], date: MonthDay(month: 1, day: 2)).fullNames == "Cher")
     }
 }
+
+@Suite struct QuickAddRuleTests {
+    @Test func birthdayWithoutYear() {
+        let g = RuleReader.read("Mom's birthday is March 3", calendar: gregorian)
+        #expect(g.kind == .birthday)
+        #expect(g.names == ["Mom"])
+        #expect(g.month == 3 && g.day == 3)
+        #expect(g.year == nil)
+    }
+
+    @Test func coupleAnniversaryWithYear() {
+        let g = RuleReader.read("Rohan and Anika's anniversary is June 12, 2019", calendar: gregorian)
+        #expect(g.kind == .anniversary)
+        #expect(g.names == ["Rohan", "Anika"])
+        #expect(g.month == 6 && g.day == 12)
+        #expect(g.year == 2019)
+    }
+
+    @Test func numericDateAndFullName() {
+        let g = RuleReader.read("Priya Patel bday 3/14/90", calendar: gregorian)
+        #expect(g.names == ["Priya Patel"])
+        #expect(g.month == 3 && g.day == 14)
+        #expect(g.year == 1990)
+    }
+
+    @Test func modelYearMustBeTyped() {
+        let model = QuickAddGuess(kind: .birthday, names: ["Sam"], month: 5, day: 1, year: 1988)
+        let rules = QuickAddGuess(kind: .birthday, names: ["Sam"], month: 5, day: 1, year: nil)
+        #expect(QuickAdd.merge(model: model, rules: rules, text: "Sam's bday May 1").year == nil)
+        #expect(QuickAdd.merge(model: model, rules: rules, text: "Sam born May 1 1988").year == 1988)
+    }
+
+    @Test func contactMatching() {
+        let people = [
+            contact("1", "Priya", "Patel"), contact("2", "Priya", "Shah"),
+            contact("3", "Rohan", "Shah"),
+        ]
+        #expect(ContactMatcher.sure(ContactMatcher.matches(for: "rohan", in: people))?.id == "3")
+        #expect(ContactMatcher.sure(ContactMatcher.matches(for: "Priya", in: people)) == nil)
+        #expect(ContactMatcher.matches(for: "Priya", in: people).count == 2)
+        #expect(ContactMatcher.sure(ContactMatcher.matches(for: "priya shah", in: people))?.id == "2")
+    }
+}
