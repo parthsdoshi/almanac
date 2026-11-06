@@ -289,9 +289,9 @@ struct UpNextCard: View {
             HStack(spacing: 12) {
                 Text(def.id.rawValue)
                     .font(Theme.Typography.display(40, .black, relativeTo: .largeTitle))
-                    .foregroundStyle(Theme.Colors.gold)
+                    .foregroundStyle(Theme.Colors.goldOnInk)
                 VStack(alignment: .leading, spacing: 2) {
-                    Eyebrow(text: "Up next · about \(def.estimatedMinutes) min", color: Theme.Colors.gold)
+                    Eyebrow(text: "Up next · about \(def.estimatedMinutes) min", color: Theme.Colors.goldOnInk)
                     Text(def.title)
                         .font(Theme.Typography.display(19, .bold, relativeTo: .headline))
                         .foregroundStyle(Theme.Colors.paper)

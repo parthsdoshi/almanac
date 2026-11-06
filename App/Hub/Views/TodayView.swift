@@ -136,7 +136,7 @@ struct TodayView: View {
         HStack(spacing: 14) {
             Text(lifted ? "✓" : def.id.rawValue)
                 .font(Theme.Typography.display(28, .black))
-                .foregroundStyle(Theme.Colors.gold)
+                .foregroundStyle(Theme.Colors.goldOnInk)
                 .frame(width: 44, height: 50)
                 .background(Theme.Colors.ink, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
                 .accessibilityHidden(true)

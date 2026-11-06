@@ -26,6 +26,8 @@ enum Theme {
         static let onAnniversary = UIColor(light: 0xFFF8EC, dark: 0x1C110C)
         static let gold = UIColor(light: 0xF2B33D, dark: 0xFFC857)
         static let onGold = UIColor(light: 0x2B2118, dark: 0x1C110C)
+        /// Gold on an ink background. Ink turns cream in dark mode, so the gold deepens to stay readable.
+        static let goldOnInk = UIColor(light: 0xF2B33D, dark: 0x9A5B00)
         static let acted = UIColor(light: 0x2F7A45, dark: 0x7CCB90)
         static let missed = UIColor(light: 0xA65A0C, dark: 0xF2A54E)
     }
@@ -45,6 +47,7 @@ enum Theme {
         static let onAnniversary = Color(uiColor: Palette.onAnniversary)
         static let gold = Color(uiColor: Palette.gold)
         static let onGold = Color(uiColor: Palette.onGold)
+        static let goldOnInk = Color(uiColor: Palette.goldOnInk)
 
         static let accent = birthday
         static let acted = Color(uiColor: Palette.acted)
