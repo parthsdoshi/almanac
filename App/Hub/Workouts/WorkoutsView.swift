@@ -40,6 +40,8 @@ final class WorkoutUI {
         guard let a = active else { return }
         if let done = a.finish() {
             finished = Finished(session: done.session, def: a.def, graduations: done.graduations)
+            let session = done.session
+            Task { await HealthService.shared.save(session) }
         }
         active = nil
     }
@@ -470,6 +472,8 @@ struct BodyweightSheet: View {
                     s.workouts.bodyweight.append(BodyweightEntry(date: today, lb: lb))
                     s.workouts.bodyweight.sort { $0.date < $1.date }
                 }
+                let saved = lb
+                Task { await HealthService.shared.saveBodyweight(saved) }
                 dismiss()
             }
             .buttonStyle(PillButtonStyle(fill: Theme.Colors.birthday, text: Theme.Colors.onBirthday, height: 50))

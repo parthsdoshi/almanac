@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @AppStorage(HealthService.enabledKey) private var saveToHealth = false
+    @State private var healthNote: String?
 
     var body: some View {
         NavigationStack {
@@ -85,6 +87,30 @@ struct SettingsView: View {
                             : "The Live Activity starts when you open the app on the day. On iOS 26 or later it starts by itself at your reminder time.")
                 }
                 .listRowBackground(Theme.Colors.card)
+
+                if HealthService.isAvailable {
+                    Section {
+                        Toggle("Save workouts to Health", isOn: Binding(
+                            get: { saveToHealth },
+                            set: { on in
+                                if !on { saveToHealth = false; healthNote = nil; return }
+                                Task {
+                                    let ok = await HealthService.shared.requestAccess()
+                                    saveToHealth = ok
+                                    healthNote = ok ? nil : "Health didn't allow it. Turn on Shebang#! in the Health app under Sharing, then try again."
+                                }
+                            }))
+                            .tint(Theme.Colors.acted)
+                        if let healthNote {
+                            Text(healthNote).font(.footnote).foregroundStyle(Theme.Colors.missed)
+                        }
+                    } header: {
+                        Text("Apple Health")
+                    } footer: {
+                        Text("Each finished lift goes to Health as a strength workout, and bodyweight you log goes in too. Nothing is read from Health.")
+                    }
+                    .listRowBackground(Theme.Colors.card)
+                }
 
                 Section {
                     Button("Show the tour again") { model.showTutorial = true }
