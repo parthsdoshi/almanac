@@ -1,0 +1,2 @@
+iPhoneSimulator.sdk
+iPhoneSimulator27.2.sdk

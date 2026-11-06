@@ -1,0 +1,935 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.4.2 effective-5.10 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)
+// swift-module-flags: -target arm64-apple-ios27.0 -enable-objc-interop -enable-library-evolution -language-mode 5 -O -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -user-module-version 25407 -module-name Evaluations -package-name Evaluations
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.4.2
+import Foundation
+import FoundationModels
+import OSLog
+import Swift
+import TabularData
+import Testing
+import UniformTypeIdentifiers
+import XCTest
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+import _Testing_Foundation
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum ArgumentValue : Swift::Sendable, Swift::Codable, Swift::Hashable {
+  case string(Swift::String)
+  case int(Swift::Int)
+  case double(Swift::Double)
+  case bool(Swift::Bool)
+  public var structuredValue: Evaluations::StructuredValue {
+    get
+  }
+  nonisolated public static var generationSchema: FoundationModels::GenerationSchema {
+    get
+  }
+  nonisolated public var generatedContent: FoundationModels::GeneratedContent {
+    get
+  }
+  public static func == (a: Evaluations::ArgumentValue, b: Evaluations::ArgumentValue) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentValue : nonisolated FoundationModels::Generable {
+  nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentValue : Swift::ExpressibleByStringLiteral {
+  public init(stringLiteral value: Swift::String)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias ExtendedGraphemeClusterLiteralType = Swift::String
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias StringLiteralType = Swift::String
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias UnicodeScalarLiteralType = Swift::String
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentValue : Swift::ExpressibleByIntegerLiteral {
+  public init(integerLiteral value: Swift::Int)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias IntegerLiteralType = Swift::Int
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentValue : Swift::ExpressibleByFloatLiteral {
+  public init(floatLiteral value: Swift::Double)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias FloatLiteralType = Swift::Double
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentValue : Swift::ExpressibleByBooleanLiteral {
+  public init(booleanLiteral value: Swift::Bool)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias BooleanLiteralType = Swift::Bool
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum StructuredValue : Swift::Sendable, Swift::Hashable {
+  case string(Swift::String)
+  case int(Swift::Int)
+  case double(Swift::Double)
+  case bool(Swift::Bool)
+  case null
+  case array([Evaluations::StructuredValue])
+  case dictionary([Swift::String : Evaluations::StructuredValue])
+  public var value: Any {
+    get
+  }
+  public static func == (a: Evaluations::StructuredValue, b: Evaluations::StructuredValue) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByStringLiteral {
+  public init(stringLiteral value: Swift::String)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias ExtendedGraphemeClusterLiteralType = Swift::String
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias StringLiteralType = Swift::String
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias UnicodeScalarLiteralType = Swift::String
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByIntegerLiteral {
+  public init(integerLiteral value: Swift::Int)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias IntegerLiteralType = Swift::Int
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByFloatLiteral {
+  public init(floatLiteral value: Swift::Double)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias FloatLiteralType = Swift::Double
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByBooleanLiteral {
+  public init(booleanLiteral value: Swift::Bool)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias BooleanLiteralType = Swift::Bool
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByArrayLiteral {
+  public typealias ArrayLiteralElement = Evaluations::StructuredValue
+  public init(arrayLiteral elements: Evaluations::StructuredValue...)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::ExpressibleByDictionaryLiteral {
+  public typealias Key = Swift::String
+  public typealias Value = Evaluations::StructuredValue
+  public init(dictionaryLiteral elements: (Swift::String, Evaluations::StructuredValue)...)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::StructuredValue : Swift::Codable {
+  public init(from decoder: any Swift::Decoder) throws
+  public func encode(to encoder: any Swift::Encoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::Metric {
+  public static let toolsAllPass: Evaluations::Metric
+  public static let toolsPercentagePass: Evaluations::Metric
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ToolCallEvaluator<Input> : Evaluations::EvaluatorProtocol, Swift::Sendable where Input : Evaluations::ModelSampleProtocol, Input.Expectation == Evaluations::TrajectoryExpectation {
+  public let allPass: Evaluations::Metric
+  public let percentagePass: Evaluations::Metric
+  @available(anyAppleOS 27.0, *)
+  @available(watchOS, unavailable)
+  public init(allPass: Evaluations::Metric, percentagePass: Evaluations::Metric)
+  public init(allPass: Evaluations::Metric, percentagePass: Evaluations::Metric, argumentMatchModel: any FoundationModels::LanguageModel)
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func metrics(subject: Evaluations::ModelSubject<Input.ExpectedValue>, input: Input) async throws -> [Evaluations::Metric]
+  #endif
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias Subject = Evaluations::ModelSubject<Input.ExpectedValue>
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum ArgumentMatcher : Swift::Sendable, Swift::Codable {
+  case exact(argumentName: Swift::String, value: Evaluations::ArgumentValue)
+  case keyOnly(argumentName: Swift::String)
+  case oneOf(argumentName: Swift::String, allowedValues: [Evaluations::ArgumentValue])
+  case range(argumentName: Swift::String, minimum: Swift::Double?, maximum: Swift::Double?)
+  case pattern(argumentName: Swift::String, regex: Swift::String)
+  case contains(argumentName: Swift::String, substring: Swift::String)
+  case hasPrefix(argumentName: Swift::String, prefix: Swift::String)
+  case hasSuffix(argumentName: Swift::String, suffix: Swift::String)
+  case naturalLanguage(argumentName: Swift::String, criteria: Swift::String)
+  public init(from decoder: any Swift::Decoder) throws
+  public func encode(to encoder: any Swift::Encoder) throws
+  nonisolated public enum PartiallyGenerated : nonisolated FoundationModels::ConvertibleFromGeneratedContent {
+    case exact(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, value: Evaluations::ArgumentValue.FoundationModels::PartiallyGenerated?)
+    case keyOnly(argumentName: Swift::String.FoundationModels::PartiallyGenerated?)
+    case oneOf(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, allowedValues: Swift::Array<Evaluations::ArgumentValue>.FoundationModels::PartiallyGenerated?)
+    case range(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, minimum: Swift::Optional<Swift::Double>.FoundationModels::PartiallyGenerated?, maximum: Swift::Optional<Swift::Double>.FoundationModels::PartiallyGenerated?)
+    case pattern(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, regex: Swift::String.FoundationModels::PartiallyGenerated?)
+    case contains(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, substring: Swift::String.FoundationModels::PartiallyGenerated?)
+    case hasPrefix(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, prefix: Swift::String.FoundationModels::PartiallyGenerated?)
+    case hasSuffix(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, suffix: Swift::String.FoundationModels::PartiallyGenerated?)
+    case naturalLanguage(argumentName: Swift::String.FoundationModels::PartiallyGenerated?, criteria: Swift::String.FoundationModels::PartiallyGenerated?)
+    nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+  }
+  nonisolated public static var generationSchema: FoundationModels::GenerationSchema {
+    get
+  }
+  nonisolated public var generatedContent: FoundationModels::GeneratedContent {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ArgumentMatcher : nonisolated FoundationModels::Generable {
+  nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ToolExpectation : Swift::Sendable, Swift::Codable {
+  public var name: Swift::String {
+    get
+  }
+  public var arguments: [Evaluations::ArgumentMatcher] {
+    get
+  }
+  public var isAnyOrderGroup: Swift::Bool {
+    get
+  }
+  public init(_ name: Swift::String, arguments: [Evaluations::ArgumentMatcher] = [])
+  public static func anyOrder(_ expectations: [Evaluations::ToolExpectation]) -> Evaluations::ToolExpectation
+  public init(from decoder: any Swift::Decoder) throws
+  public func encode(to encoder: any Swift::Encoder) throws
+  nonisolated public static var generationSchema: FoundationModels::GenerationSchema {
+    get
+  }
+  nonisolated public var generatedContent: FoundationModels::GeneratedContent {
+    get
+  }
+  nonisolated public enum PartiallyGenerated : nonisolated FoundationModels::ConvertibleFromGeneratedContent {
+    case expectation(name: Swift::String.FoundationModels::PartiallyGenerated?, arguments: Swift::Array<Evaluations::ArgumentMatcher>.FoundationModels::PartiallyGenerated?)
+    case anyOrder(expectations: Swift::Array<Evaluations::ToolExpectation>.FoundationModels::PartiallyGenerated?)
+    nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ToolExpectation : nonisolated FoundationModels::Generable {
+  nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct TrajectoryExpectation : Swift::Sendable, Swift::Codable {
+  public var ordered: [Evaluations::ToolExpectation]
+  public var unordered: [Evaluations::ToolExpectation]
+  public var disallowed: [Evaluations::ToolExpectation]
+  public var allowsAdditionalCalls: Swift::Bool
+  public init(ordered: [Evaluations::ToolExpectation] = [], unordered: [Evaluations::ToolExpectation] = [], allowsAdditionalToolCalls: Swift::Bool = true)
+  public init(ordered: [Evaluations::ToolExpectation] = [], unordered: [Evaluations::ToolExpectation] = [], disallowed: [Evaluations::ToolExpectation])
+  public init(unordered: [Evaluations::ToolExpectation])
+  public init(expected toolName: Swift::String, arguments: [Evaluations::ArgumentMatcher] = [])
+  nonisolated public static var generationSchema: FoundationModels::GenerationSchema {
+    get
+  }
+  nonisolated public var generatedContent: FoundationModels::GeneratedContent {
+    get
+  }
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::TrajectoryExpectation : nonisolated FoundationModels::Generable {
+  nonisolated public init(_ content: FoundationModels::GeneratedContent) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct StructuredTranscript : Swift::Sendable {
+  public var toolCalls: [FoundationModels::Transcript.FoundationModels::ToolCall]
+  public var toolOutputs: [FoundationModels::Transcript.FoundationModels::ToolOutput]
+  public var instructionText: Swift::String
+  public var prompts: [Swift::String]
+  public var responses: [FoundationModels::Transcript.FoundationModels::Response]
+  public init(toolCalls: [FoundationModels::Transcript.FoundationModels::ToolCall] = [], toolOutputs: [FoundationModels::Transcript.FoundationModels::ToolOutput] = [], instructionText: Swift::String = "", prompts: [Swift::String] = [], responses: [FoundationModels::Transcript.FoundationModels::Response] = [])
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension FoundationModels::Transcript {
+  public var structuredTranscript: Evaluations::StructuredTranscript {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct Evaluator<Input> : Evaluations::EvaluatorProtocol, @unchecked Swift::Sendable where Input : Evaluations::SampleProtocol, Input.ExpectedValue : Swift::Decodable, Input.ExpectedValue : Swift::Encodable, Input.ExpectedValue : Swift::Sendable {
+  public init(_ evaluate: nonisolated(nonsending) @escaping (Input, Evaluations::ModelSubject<Input.ExpectedValue>) async throws -> Evaluations::Metric)
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func metrics(subject: Evaluations::ModelSubject<Input.ExpectedValue>, input: Input) async throws -> [Evaluations::Metric]
+  #endif
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias Subject = Evaluations::ModelSubject<Input.ExpectedValue>
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum ScoringMode : Swift::Sendable {
+  case discrete
+  case continuous
+  public static func == (a: Evaluations::ScoringMode, b: Evaluations::ScoringMode) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelJudgeEvaluator<Input> : Evaluations::EvaluatorProtocol, Swift::Sendable where Input : Evaluations::ModelSampleProtocol {
+  public let dimensions: [Evaluations::ScoreDimension]
+  public let scoringMode: Evaluations::ScoringMode
+  public static var defaultInstructions: Swift::String {
+    get
+  }
+  @available(anyAppleOS 27.0, *)
+  public init(_ name: Swift::String, scale: Evaluations::ScoringScale, judge: any FoundationModels::LanguageModel = SystemLanguageModel(), scoringMode: Evaluations::ScoringMode = .discrete)
+  public init(_ name: Swift::String, scale: Evaluations::ScoringScale, judge: any FoundationModels::LanguageModel, scoringMode: Evaluations::ScoringMode = .discrete, prompt: Evaluations::ModelJudgePrompt<Input>)
+  @available(anyAppleOS 27.0, *)
+  public init(judge: any FoundationModels::LanguageModel = SystemLanguageModel(), dimensions: [Evaluations::ScoreDimension], scoringMode: Evaluations::ScoringMode = .discrete)
+  public init(judge: any FoundationModels::LanguageModel, dimensions: [Evaluations::ScoreDimension], scoringMode: Evaluations::ScoringMode = .discrete, prompt: Evaluations::ModelJudgePrompt<Input>)
+  public static func pairwise(_ name: Swift::String, scale: Evaluations::ScoringScale, judge: any FoundationModels::LanguageModel, scoringMode: Evaluations::ScoringMode = .discrete, evaluationTarget: (@Sendable (Input.ExpectedValue) -> Swift::String)? = nil) -> Evaluations::ModelJudgeEvaluator<Input>
+  public static func pairwise(judge: any FoundationModels::LanguageModel, dimensions: [Evaluations::ScoreDimension], scoringMode: Evaluations::ScoringMode = .discrete, evaluationTarget: (@Sendable (Input.ExpectedValue) -> Swift::String)? = nil) -> Evaluations::ModelJudgeEvaluator<Input>
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func judgePrompt(for sample: Input, output: Input.ExpectedValue) async throws -> FoundationModels::Prompt
+  #endif
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func metrics(subject: Evaluations::ModelSubject<Input.ExpectedValue>, input: Input) async throws -> [Evaluations::Metric]
+  #endif
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias Subject = Evaluations::ModelSubject<Input.ExpectedValue>
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum ModelJudgeError : Foundation::LocalizedError {
+  case invalidScore(dimension: Swift::String, value: Swift::String)
+  case invalidResponse(Swift::String)
+  case jsonDecodingFailed(response: Swift::String, underlying: any Swift::Error)
+  case missingDimension(Swift::String, response: Swift::String)
+  case noScaleValues(dimension: Swift::String)
+  public var errorDescription: Swift::String? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelJudgePrompt<Input> : Swift::Sendable where Input : Evaluations::ModelSampleProtocol {
+  public static var defaultInstructions: Swift::String {
+    get
+  }
+  public let instructions: Swift::String
+  public let evaluationTarget: (@Sendable (Input.ExpectedValue) -> Swift::String)?
+  public let reference: (nonisolated(nonsending) @Sendable (Input, Input.ExpectedValue) async throws -> [Swift::String : Swift::String])?
+  public init(instructions: Swift::String = ModelJudgePrompt.defaultInstructions, evaluationTarget: (@Sendable (Input.ExpectedValue) -> Swift::String)? = nil, reference: (nonisolated(nonsending) @Sendable (Input, Input.ExpectedValue) async throws -> [Swift::String : Swift::String])? = nil)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol ScoreLevel : Swift::CaseIterable, Swift::Hashable, Swift::Sendable {
+  var label: Swift::String { get }
+  var guideDescription: Swift::String { get }
+  var value: Swift::Double { get }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ScoreLevel {
+  public var label: Swift::String {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ScaleOption : Swift::Sendable {
+  public let label: Swift::String
+  public let guideDescription: Swift::String
+  public let value: Swift::Double
+  public init(label: Swift::String, guideDescription: Swift::String, value: Swift::Double)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ScoringScale : Swift::Sendable {
+  public let options: [Evaluations::ScaleOption]
+  public init(options: [Evaluations::ScaleOption])
+  public static func numeric(_ scale: [Swift::Double : Swift::String]) -> Evaluations::ScoringScale
+  public static func passFail(passDescription: Swift::String, failDescription: Swift::String) -> Evaluations::ScoringScale
+  public static func custom<Level>(_ level: Level.Type) -> Evaluations::ScoringScale where Level : Evaluations::ScoreLevel
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ScoreDimension : Swift::Sendable {
+  public let name: Swift::String
+  public let description: Swift::String?
+  public let scale: Evaluations::ScoringScale
+  public var metric: Evaluations::Metric {
+    get
+  }
+  public init(_ name: Swift::String, description: Swift::String? = nil, scale: Evaluations::ScoringScale)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct EvaluationTrait : Testing::TestTrait, Testing::TestScoping {
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func provideScope(for test: Testing::Test, testCase: Testing::Test.Testing::Case?, performing function: @concurrent @Sendable () async throws -> Swift::Void) async throws
+  #endif
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias TestScopeProvider = Evaluations::EvaluationTrait
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Testing::TestTrait where Self == Evaluations::EvaluationTrait {
+  public static func evaluates(_ evaluation: any Evaluations::Evaluation, info: [Swift::String : Swift::String] = [:], recordTranscripts: Swift::Bool = false) -> Self
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct EvaluationContext : Swift::Sendable {
+  public static var current: Evaluations::EvaluationContext {
+    get
+  }
+  public let result: Evaluations::EvaluationResult
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum AggregationOperation : Swift::Sendable, Swift::Equatable {
+  case mean(of: Evaluations::Metric)
+  case median(of: Evaluations::Metric)
+  case mode(of: Evaluations::Metric)
+  case minimum(of: Evaluations::Metric)
+  case maximum(of: Evaluations::Metric)
+  case standardDeviation(of: Evaluations::Metric)
+  case variance(of: Evaluations::Metric)
+  case custom(label: Swift::String)
+  public var label: Swift::String {
+    get
+  }
+  public static func == (a: Evaluations::AggregationOperation, b: Evaluations::AggregationOperation) -> Swift::Bool
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::AggregationOperation : Swift::Codable {
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct AggregateMetric : Swift::Sendable, Swift::Codable, Swift::Equatable {
+  public let operation: Evaluations::AggregationOperation
+  public let group: Swift::String?
+  public let value: Swift::Double
+  public var label: Swift::String {
+    get
+  }
+  public var sourceMetric: Swift::String? {
+    get
+  }
+  public static func == (a: Evaluations::AggregateMetric, b: Evaluations::AggregateMetric) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol Evaluation : Swift::Sendable {
+  associatedtype Sample where Self.Sample == Self.SampleLoader.Sample, Self.Sample.ExpectedValue == Self.Subject.Value
+  associatedtype Subject : Evaluations::EvaluationSubject
+  associatedtype SampleLoader : Evaluations::Loader
+  var name: Swift::String { get }
+  var dataset: Self.SampleLoader { get }
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) func subject(from sample: Self.Sample) async throws -> Self.Subject
+  #endif
+  @Evaluations::EvaluatorsBuilder<Self.Sample, Self.Subject> var evaluators: Self.Evaluators { get }
+  func aggregateMetrics(using aggregator: inout Evaluations::MetricsAggregator)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::Evaluation {
+  public typealias Evaluators = [any Evaluations::EvaluatorProtocol<Self.Sample, Self.Subject>]
+  public var name: Swift::String {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::Evaluation {
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public func run(info: [Swift::String : Swift::String] = [:]) async throws -> Evaluations::EvaluationResult
+  #endif
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum EvaluationError : Swift::Error, Foundation::LocalizedError {
+  case missingTranscript(evaluatorType: Swift::String)
+  case duplicateMetricName(name: Swift::String)
+  public var errorDescription: Swift::String? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct EvaluationRunErrors : Swift::Sendable, Swift::Codable, Swift::Hashable {
+  public var inferenceFailureCount: Swift::Int
+  public var evaluatorFailureCount: Swift::Int
+  public var failingEvaluatorTypes: Swift::Set<Swift::String>
+  public var anyInferenceProduced: Swift::Bool
+  public var metricsNotFound: [Swift::String]
+  public var hasFailures: Swift::Bool {
+    get
+  }
+  public static let clean: Evaluations::EvaluationRunErrors
+  public static func == (a: Evaluations::EvaluationRunErrors, b: Evaluations::EvaluationRunErrors) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum SubjectInferenceError : Swift::Error, Foundation::LocalizedError, Swift::Codable, Swift::Sendable, Swift::Hashable {
+  case failed(reason: Swift::String)
+  public var errorDescription: Swift::String? {
+    get
+  }
+  public static func == (a: Evaluations::SubjectInferenceError, b: Evaluations::SubjectInferenceError) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public enum EvaluatorError : Swift::Error, Foundation::LocalizedError, Swift::Sendable {
+  case failed(evaluator: (any Evaluations::EvaluatorProtocol)?, evaluatorType: Swift::String, reason: Swift::String)
+  public var errorDescription: Swift::String? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct EvaluationResult : Swift::Sendable {
+  public let resultID: Foundation::UUID
+  public let evaluationID: Swift::String
+  public var summary: TabularData::DataFrame {
+    get
+  }
+  public var detailed: TabularData::DataFrame {
+    get
+  }
+  public var reportMetadata: [Swift::String : any Swift::Sendable] {
+    get
+  }
+  public let evaluationInfo: [Swift::String : Swift::String]
+  public let startTime: Foundation::Date
+  public let endTime: Foundation::Date
+  public var duration: Foundation::TimeInterval {
+    get
+  }
+  public let errors: Evaluations::EvaluationRunErrors
+  public func aggregateValue(_ operation: Evaluations::AggregationOperation) -> Swift::Double
+  public var groupedSummary: Swift::String {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ResultColumn<Value> : Swift::Sendable {
+  public let name: Swift::String
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::Evaluation {
+  public var inputColumn: Evaluations::ResultColumn<Self.Sample> {
+    get
+  }
+  public var responseColumn: Evaluations::ResultColumn<Self.Subject> {
+    get
+  }
+  public var expectedColumn: Evaluations::ResultColumn<Self.Sample.ExpectedValue> {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension TabularData::DataFrame {
+  public subscript<T>(column: Evaluations::ResultColumn<T>) -> TabularData::Column<T> {
+    get
+  }
+  public subscript(metric metric: Evaluations::Metric) -> TabularData::Column<Evaluations::Metric> {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::EvaluationResult {
+  public func jsonData(includeReportMetadata: Swift::Bool = false, includeTranscripts: Swift::Bool = false, jsonOptions: Foundation::JSONSerialization.Foundation::WritingOptions = [.prettyPrinted, .sortedKeys]) throws -> Foundation::Data
+  @discardableResult
+  public func saveJSON(to directory: Foundation::URL, includeReportMetadata: Swift::Bool = false, includeTranscripts: Swift::Bool = false) throws -> Foundation::URL
+  public static func loadJSON(from url: Foundation::URL) throws -> Evaluations::EvaluationResult
+  public init(jsonData data: Foundation::Data) throws
+  public enum DataFrameKind {
+    case summary
+    case detailed
+    public static func == (a: Evaluations::EvaluationResult.Evaluations::DataFrameKind, b: Evaluations::EvaluationResult.Evaluations::DataFrameKind) -> Swift::Bool
+    public func hash(into hasher: inout Swift::Hasher)
+    public var hashValue: Swift::Int {
+      get
+    }
+  }
+  public func jsonRepresentableDataFrame(of kind: Evaluations::EvaluationResult.Evaluations::DataFrameKind) throws -> TabularData::DataFrame
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::EvaluationResult {
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) public static func loadJSONLines(from url: Foundation::URL) async throws -> [Evaluations::EvaluationResult]
+  #endif
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Swift::Collection where Self.Element == Evaluations::EvaluationResult {
+  @discardableResult
+  public func saveJSONLines(to url: Foundation::URL, includeReportMetadata: Swift::Bool = false, includeTranscripts: Swift::Bool = false) throws -> Foundation::URL
+}
+public enum EvaluationResultsError : Foundation::LocalizedError, Swift::Equatable {
+  case fileNotFound(Foundation::URL)
+  case emptyJSONFile
+  case invalidJSONFormat
+  public var errorDescription: Swift::String? {
+    get
+  }
+  public static func == (a: Evaluations::EvaluationResultsError, b: Evaluations::EvaluationResultsError) -> Swift::Bool
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol EvaluationSubject<Value> {
+  associatedtype Value : Swift::Decodable, Swift::Encodable
+  var value: Self.Value { get }
+  var transcript: Evaluations::StructuredTranscript? { get }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::EvaluationSubject {
+  public var transcript: Evaluations::StructuredTranscript? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelSubject<Value> : Evaluations::EvaluationSubject, Swift::Sendable where Value : Swift::Decodable, Value : Swift::Encodable, Value : Swift::Sendable {
+  public var value: Value
+  public var transcript: Evaluations::StructuredTranscript?
+  public init(value: Value, transcript: Evaluations::StructuredTranscript? = nil)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ModelSubject {
+  public var toolCalls: [FoundationModels::Transcript.FoundationModels::ToolCall] {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol EvaluatorProtocol<Input, Subject> : Swift::Sendable {
+  associatedtype Input : Evaluations::SampleProtocol where Self.Input.ExpectedValue == Self.Subject.Value
+  associatedtype Subject : Evaluations::EvaluationSubject
+  #if compiler(>=5.3) && $AsyncExecutionBehaviorAttributes
+  nonisolated(nonsending) func metrics(subject: Self.Subject, input: Self.Input) async throws -> [Evaluations::Metric]
+  #endif
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+@_functionBuilder public struct EvaluatorsBuilder<Sample, Subject> where Sample : Evaluations::SampleProtocol, Subject : Evaluations::EvaluationSubject {
+  public static func buildExpression(_ expression: any Evaluations::EvaluatorProtocol<Sample, Subject>) -> any Evaluations::EvaluatorProtocol<Sample, Subject>
+  public static func buildOptional(_ component: [any Evaluations::EvaluatorProtocol<Sample, Subject>]?) -> [any Evaluations::EvaluatorProtocol<Sample, Subject>]
+  public static func buildPartialBlock(first: any Evaluations::EvaluatorProtocol<Sample, Subject>) -> [any Evaluations::EvaluatorProtocol<Sample, Subject>]
+  public static func buildPartialBlock(first: [any Evaluations::EvaluatorProtocol<Sample, Subject>]) -> [any Evaluations::EvaluatorProtocol<Sample, Subject>]
+  public static func buildPartialBlock(accumulated: [any Evaluations::EvaluatorProtocol<Sample, Subject>], next: any Evaluations::EvaluatorProtocol<Sample, Subject>) -> [any Evaluations::EvaluatorProtocol<Sample, Subject>]
+  public static func buildPartialBlock(accumulated: [any Evaluations::EvaluatorProtocol<Sample, Subject>], next: [any Evaluations::EvaluatorProtocol<Sample, Subject>]) -> [any Evaluations::EvaluatorProtocol<Sample, Subject>]
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol Loader<Sample> : Swift::Sendable {
+  associatedtype Sample : Evaluations::SampleProtocol
+  var stream: any _Concurrency::AsyncSequence<Self.Sample, any Swift::Error> { get }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ArrayLoader<Sample> : Evaluations::Loader, Swift::ExpressibleByArrayLiteral where Sample : Evaluations::SampleProtocol {
+  public init(samples: [Sample])
+  public init(arrayLiteral elements: Sample...)
+  public var stream: any _Concurrency::AsyncSequence<Sample, any Swift::Error> {
+    get
+  }
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias ArrayLiteralElement = Sample
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct JSONLoader<Sample> : Evaluations::Loader where Sample : Evaluations::SampleProtocol {
+  public init(url: Foundation::URL)
+  public var stream: any _Concurrency::AsyncSequence<Sample, any Swift::Error> {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct StreamLoader<Sample> : Evaluations::Loader where Sample : Evaluations::SampleProtocol {
+  public init(stream: some AsyncSequence<Sample, Error> & Sendable)
+  public var stream: any _Concurrency::AsyncSequence<Sample, any Swift::Error> {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct Metric : Swift::Sendable, Swift::Equatable {
+  public let name: Swift::String
+  public let value: Evaluations::Metric.Evaluations::Value
+  public let rationale: Swift::String?
+  public enum Value : Swift::Equatable, Swift::Sendable {
+    case passing
+    case failing
+    case scoring(Swift::Double)
+    case ignore
+    public static func == (a: Evaluations::Metric.Evaluations::Value, b: Evaluations::Metric.Evaluations::Value) -> Swift::Bool
+  }
+  public init(_ name: Swift::String)
+  public func passing(rationale: Swift::String? = nil) -> Evaluations::Metric
+  public func failing(rationale: Swift::String? = nil) -> Evaluations::Metric
+  public func scoring(_ value: Swift::Double, rationale: Swift::String? = nil) -> Evaluations::Metric
+  public func ignore(rationale: Swift::String? = nil) -> Evaluations::Metric
+  public var doubleValue: Swift::Double? {
+    get
+  }
+  public static func == (lhs: Evaluations::Metric, rhs: Evaluations::Metric) -> Swift::Bool
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Swift::Array where Element == Evaluations::Metric {
+  public subscript(metric: Evaluations::Metric) -> Evaluations::Metric? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::Metric : Swift::CustomStringConvertible {
+  public var description: Swift::String {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct MetricsAggregator {
+  public mutating func group(_ name: Swift::String, _ body: (inout Evaluations::MetricsAggregator.Evaluations::Group) -> Swift::Void)
+  public mutating func computeMean(of metric: Evaluations::Metric)
+  public mutating func computeMedian(of metric: Evaluations::Metric)
+  public mutating func computeMode(of metric: Evaluations::Metric)
+  public mutating func computeMinimum(of metric: Evaluations::Metric)
+  public mutating func computeMaximum(of metric: Evaluations::Metric)
+  public mutating func computeStandardDeviation(of metric: Evaluations::Metric)
+  public mutating func computeVariance(of metric: Evaluations::Metric)
+  public mutating func custom(of metric: Evaluations::Metric, label: Swift::String, _ body: ([Swift::Double]) -> Swift::Double)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::MetricsAggregator {
+  public struct Group {
+    public let name: Swift::String
+    public mutating func computeMean(of metric: Evaluations::Metric)
+    public mutating func computeMedian(of metric: Evaluations::Metric)
+    public mutating func computeMode(of metric: Evaluations::Metric)
+    public mutating func computeMinimum(of metric: Evaluations::Metric)
+    public mutating func computeMaximum(of metric: Evaluations::Metric)
+    public mutating func computeStandardDeviation(of metric: Evaluations::Metric)
+    public mutating func computeVariance(of metric: Evaluations::Metric)
+    public mutating func custom(of metric: Evaluations::Metric, label: Swift::String, _ body: ([Swift::Double]) -> Swift::Double)
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelSample<ExpectedValue> : Evaluations::ModelSampleProtocol where ExpectedValue : Swift::Decodable, ExpectedValue : Swift::Encodable, ExpectedValue : Swift::Sendable {
+  public var input: Evaluations::ModelSampleInput
+  public var output: Evaluations::ModelSampleOutput<ExpectedValue, Evaluations::TrajectoryExpectation>
+  public var expected: ExpectedValue? {
+    get
+  }
+  public init(prompt: Swift::String, expected: ExpectedValue? = Optional<String>(nilLiteral: ()), instructions: Swift::String? = nil, generationSchema: FoundationModels::GenerationSchema? = nil, expectations: Evaluations::TrajectoryExpectation? = nil)
+  public init(prompt: FoundationModels::Prompt, expected: ExpectedValue? = Optional<String>(nilLiteral: ()), instructions: FoundationModels::Instructions? = nil, generationSchema: FoundationModels::GenerationSchema? = nil, expectations: Evaluations::TrajectoryExpectation? = nil)
+  public init(input: Evaluations::ModelSampleInput, expected: ExpectedValue? = Optional<String>(nilLiteral: ()), expectations: Evaluations::TrajectoryExpectation? = nil)
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias Expectation = Evaluations::TrajectoryExpectation
+  @available(anyAppleOS 27.0, *)
+  @available(tvOS, unavailable)
+  public typealias Input = Evaluations::ModelSampleInput
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ModelSample : Swift::Codable {
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ModelSample {
+  public var prompt: FoundationModels::Prompt {
+    get
+  }
+  public var promptDescription: Swift::String {
+    get
+  }
+  public var instructions: FoundationModels::Instructions? {
+    get
+  }
+  public var instructionsDescription: Swift::String? {
+    get
+  }
+  public var generationSchema: FoundationModels::GenerationSchema? {
+    get
+  }
+  public var expectations: Evaluations::TrajectoryExpectation? {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol ModelSampleProtocol : Evaluations::SampleProtocol where Self.ExpectedValue : Swift::Decodable, Self.ExpectedValue : Swift::Encodable, Self.ExpectedValue : Swift::Sendable {
+  associatedtype Expectation : Swift::Decodable, Swift::Encodable, Swift::Sendable
+  var input: Evaluations::ModelSampleInput { get }
+  var output: Evaluations::ModelSampleOutput<Self.ExpectedValue, Self.Expectation> { get }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelSampleInput : Swift::CustomStringConvertible, Swift::Sendable {
+  public var prompt: FoundationModels::Prompt
+  public var promptDescription: Swift::String {
+    get
+  }
+  public var instructions: FoundationModels::Instructions?
+  public var instructionsDescription: Swift::String? {
+    get
+  }
+  public var generationSchema: FoundationModels::GenerationSchema?
+  public var description: Swift::String {
+    get
+  }
+  public init(prompt: FoundationModels::Prompt, instructions: FoundationModels::Instructions? = nil, generationSchema: FoundationModels::GenerationSchema? = nil)
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ModelSampleInput : Swift::Codable {
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public struct ModelSampleOutput<Value, Expectation> : Swift::Sendable, Swift::Codable where Value : Swift::Decodable, Value : Swift::Encodable, Value : Swift::Sendable, Expectation : Swift::Decodable, Expectation : Swift::Encodable, Expectation : Swift::Sendable {
+  public var value: Value?
+  public var expectations: Expectation?
+  public init(value: Value? = nil, expectations: Expectation? = nil)
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public protocol SampleProtocol : Swift::Decodable, Swift::Encodable, Swift::Sendable {
+  associatedtype Input : Swift::CustomStringConvertible
+  associatedtype ExpectedValue
+  var input: Self.Input { get }
+  var expected: Self.ExpectedValue? { get }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+public actor SampleGenerator<SampleType> where SampleType : Evaluations::ModelSampleProtocol {
+  public var samplingStrategy: Evaluations::SampleGenerator<SampleType>.Evaluations::SamplingStrategy? {
+    get
+  }
+  public var validator: (nonisolated(nonsending) @Sendable (SampleType) async throws -> Swift::Bool)? {
+    get
+  }
+  public var samples: [SampleType] {
+    get
+  }
+  public var invalidSamples: [SampleType] {
+    get
+  }
+  public init<T>(_ prompt: FoundationModels::Prompt, samples: [SampleType], targetCount: Swift::Int, sessionProvider: (@Sendable () -> FoundationModels::LanguageModelSession)? = nil, samplingStrategy: Evaluations::SampleGenerator<SampleType>.Evaluations::SamplingStrategy? = .random(), validator: (nonisolated(nonsending) @Sendable (SampleType) async throws -> Swift::Bool)? = nil) where SampleType == Evaluations::ModelSample<T>, T : FoundationModels::Generable, T : Swift::Decodable, T : Swift::Encodable, T : Swift::Sendable
+  public init(_ prompt: FoundationModels::Prompt, samples: [SampleType], targetCount: Swift::Int, sessionProvider: (@Sendable () -> FoundationModels::LanguageModelSession)? = nil, samplingStrategy: Evaluations::SampleGenerator<SampleType>.Evaluations::SamplingStrategy? = .random(), validator: (nonisolated(nonsending) @Sendable (SampleType) async throws -> Swift::Bool)? = nil) where SampleType : FoundationModels::Generable
+  nonisolated public func run() -> some _Concurrency::AsyncSequence<SampleType, any Swift::Error>
+  
+  public enum SamplingStrategy : Swift::Sendable {
+    case random(retries: Swift::Int = 5)
+    case slidingWindow
+  }
+  @objc deinit
+  @_semantics("defaultActor") nonisolated final public var unownedExecutor: _Concurrency::UnownedSerialExecutor {
+    get
+  }
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Swift::Array where Element : Evaluations::ModelSampleProtocol, Element : FoundationModels::Generable {
+  public func makeSamples(_ prompt: FoundationModels::Prompt, targetCount: Swift::Int, sessionProvider: (@Sendable () -> FoundationModels::LanguageModelSession)? = nil, validator: (nonisolated(nonsending) @Sendable (Element) async throws -> Swift::Bool)? = nil) -> some _Concurrency::AsyncSequence<Element, any Swift::Error>
+  
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Swift::Array {
+  public func makeSamples<T>(_ prompt: FoundationModels::Prompt, targetCount: Swift::Int, sessionProvider: (@Sendable () -> FoundationModels::LanguageModelSession)? = nil, validator: (nonisolated(nonsending) @Sendable (Evaluations::ModelSample<T>) async throws -> Swift::Bool)? = nil) -> some _Concurrency::AsyncSequence<Evaluations::ModelSample<T>, any Swift::Error> where Element == Evaluations::ModelSample<T>, T : FoundationModels::Generable, T : Swift::Decodable, T : Swift::Encodable, T : Swift::Sendable
+  
+}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ScoringMode : Swift::Equatable {}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::ScoringMode : Swift::Hashable {}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::EvaluationResult.Evaluations::DataFrameKind : Swift::Equatable {}
+@available(anyAppleOS 27.0, *)
+@available(tvOS, unavailable)
+extension Evaluations::EvaluationResult.Evaluations::DataFrameKind : Swift::Hashable {}

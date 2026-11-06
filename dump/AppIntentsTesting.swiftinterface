@@ -1,0 +1,319 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.4.2 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)
+// swift-module-flags: -target arm64-apple-ios26.4 -enable-objc-interop -enable-library-evolution -language-mode 6 -Osize -enable-upcoming-feature InternalImportsByDefault -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature ExistentialAny -enable-upcoming-feature InferIsolatedConformances -enable-experimental-feature DebugDescriptionMacro -user-module-version 31.1.15.1.801 -module-name AppIntentsTesting
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.4.2
+public import AppIntents
+@_exported public import AppIntentsTypeSupport
+public import CoreTransferable
+public import Foundation
+public import Swift
+public import UniformTypeIdentifiers
+public import _Concurrency
+public import _StringProcessing
+public import _SwiftConcurrencyShims
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicMemberLookup public struct AnyAppEntity : Swift::Sendable, Swift::Equatable {
+  public var identifier: AppIntentsTypeSupport::AttributedEntityIdentifier {
+    get
+    set
+  }
+  public subscript<T>(dynamicMember identifier: Swift::String) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(dynamicMember identifier: Swift::String) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get
+  }
+  @_disfavoredOverload public subscript(dynamicMember identifier: Swift::String) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+  public static func == (a: AppIntentsTesting::AnyAppEntity, b: AppIntentsTesting::AnyAppEntity) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppEntity : AppIntentsTypeSupport::IntentValueConvertible {
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppEntity {
+  public func exported(as contentType: UniformTypeIdentifiers::UTType? = nil) async throws -> AppIntents::IntentFile
+  public func exported<T>(as type: T.Type) async throws -> T where T : AppIntentsTypeSupport::IntentValueConvertible, T : CoreTransferable::Transferable
+  public func exported<T>(as type: T.Type) async throws -> T where T : AppIntents::_SystemIntentValue, T : AppIntentsTypeSupport::IntentValueConvertible
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyTransientAppEntity {
+  public func exported(as contentType: UniformTypeIdentifiers::UTType? = nil) async throws -> AppIntents::IntentFile
+  public func exported<T>(as type: T.Type) async throws -> T where T : AppIntentsTypeSupport::IntentValueConvertible, T : CoreTransferable::Transferable
+  public func exported<T>(as type: T.Type) async throws -> T where T : AppIntents::_SystemIntentValue, T : AppIntentsTypeSupport::IntentValueConvertible
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicMemberLookup public struct AnyTransientAppEntity : Swift::Sendable, Swift::Equatable {
+  public var entityType: AppIntentsTypeSupport::AttributedTypeIdentifier {
+    get
+    set
+  }
+  public subscript<T>(dynamicMember identifier: Swift::String) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(dynamicMember identifier: Swift::String) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get
+    set
+  }
+  @_disfavoredOverload public subscript(dynamicMember identifier: Swift::String) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+  public static func == (a: AppIntentsTesting::AnyTransientAppEntity, b: AppIntentsTesting::AnyTransientAppEntity) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyTransientAppEntity : AppIntentsTypeSupport::IntentValueConvertible {
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicMemberLookup public struct DynamicPropertyPath : Swift::Sendable {
+  public func `as`<T>(_ type: T.Type) throws -> T where T : AppIntentsTypeSupport::IntentValueConvertible
+  public func `as`<IntentType>(_ type: IntentType) throws -> IntentType.Instance where IntentType : AppIntentsTesting::AppIntentTypeDefinition
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::DynamicPropertyPath {
+  public subscript<T>(index: Swift::Int) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(index: Swift::Int) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get throws
+  }
+  @_disfavoredOverload public subscript(index: Swift::Int) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::DynamicPropertyPath {
+  public subscript<T>(dynamicMember identifier: Swift::String) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(dynamicMember identifier: Swift::String) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get throws
+  }
+  @_disfavoredOverload public subscript(dynamicMember identifier: Swift::String) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct DynamicPropertyPathCollection : Swift::Sendable {
+  public var count: Swift::Int {
+    get
+  }
+  public var isEmpty: Swift::Bool {
+    get
+  }
+  public subscript<T>(position: Swift::Int) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(position: Swift::Int) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get throws
+  }
+  @_disfavoredOverload public subscript(position: Swift::Int) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct AppEntityDefinition : Swift::Codable, Swift::Equatable, Swift::Sendable {
+  public let bundleIdentifier: Swift::String
+  public let typeIdentifier: Swift::String
+  public func makeReference(identifier: Swift::String) -> AppIntentsTesting::AnyAppEntity
+  public static func == (a: AppIntentsTesting::AppEntityDefinition, b: AppIntentsTesting::AppEntityDefinition) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEntityDefinition : AppIntentsTesting::AppIntentTypeDefinition {
+  public typealias Instance = AppIntentsTesting::AnyAppEntity
+  public func isInstance(_ value: AppIntentsTesting::AnyAppEntity) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEntityDefinition {
+  public func resolved(from file: AppIntents::IntentFile) async throws -> AppIntentsTesting::AnyAppEntity
+  public func resolved<T>(from value: T) async throws -> AppIntentsTesting::AnyAppEntity where T : AppIntentsTypeSupport::IntentValueConvertible, T : CoreTransferable::Transferable
+  public func resolved<T>(from value: T) async throws -> AppIntentsTesting::AnyAppEntity where T : AppIntents::_SystemIntentValue, T : AppIntentsTypeSupport::IntentValueConvertible
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct AppEnumDefinition {
+  public let typeIdentifier: Swift::String
+  public func makeCase(_ rawValue: Swift::String) -> AppIntentsTesting::AnyAppEnum
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEnumDefinition : AppIntentsTesting::AppIntentTypeDefinition {
+  public typealias Instance = AppIntentsTesting::AnyAppEnum
+  public func isInstance(_ value: AppIntentsTesting::AnyAppEnum) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct AppIntentDefinition : Swift::Codable, Swift::Equatable, Swift::Sendable {
+  public let bundleIdentifier: Swift::String
+  public let identifier: Swift::String
+  public var makeIntent: AppIntentsTesting::IntentValuePropertiesCallable<AppIntentsTesting::AnyAppIntent> {
+    get
+  }
+  public static func == (a: AppIntentsTesting::AppIntentDefinition, b: AppIntentsTesting::AppIntentDefinition) -> Swift::Bool
+  public func encode(to encoder: any Swift::Encoder) throws
+  public init(from decoder: any Swift::Decoder) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public protocol AppIntentTypeDefinition {
+  associatedtype Instance : AppIntentsTypeSupport::IntentValueConvertible
+  func isInstance(_ value: Self.Instance) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct IntentDefinitions : Swift::Sendable {
+  public let bundleIdentifier: Swift::String
+  public init(bundleIdentifier: Swift::String)
+  public struct DefinitionCollection<Definition> : Swift::Sendable {
+    public subscript(typeIdentifier: Swift::String) -> Definition {
+      get
+    }
+  }
+  public var intents: AppIntentsTesting::IntentDefinitions.AppIntentsTesting::DefinitionCollection<AppIntentsTesting::AppIntentDefinition> {
+    get
+  }
+  public var enums: AppIntentsTesting::IntentDefinitions.AppIntentsTesting::DefinitionCollection<AppIntentsTesting::AppEnumDefinition> {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::IntentDefinitions {
+  public var entities: AppIntentsTesting::IntentDefinitions.AppIntentsTesting::DefinitionCollection<AppIntentsTesting::AppEntityDefinition> {
+    get
+  }
+  public var transientEntities: AppIntentsTesting::IntentDefinitions.AppIntentsTesting::DefinitionCollection<AppIntentsTesting::TransientAppEntityDefinition> {
+    get
+  }
+  public var valueQueries: AppIntentsTesting::IntentDefinitions.AppIntentsTesting::DefinitionCollection<AppIntentsTesting::IntentValueQueryDefinition> {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicCallable public struct IntentValuePropertiesCallable<T> : Swift::Sendable {
+  public func dynamicallyCall(withKeywordArguments args: Swift::KeyValuePairs<Swift::String, (any AppIntentsTypeSupport::IntentValueExpressing)?>) -> T
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct IntentValueQueryDefinition : Swift::Sendable {
+  public let bundleIdentifier: Swift::String
+  public let queryIdentifier: Swift::String
+  public func values(for input: some IntentValueConvertible) async throws -> AppIntentsTesting::ResolvedValueQueryResult
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct TransientAppEntityDefinition : Swift::Sendable, Swift::Equatable {
+  public let bundleIdentifier: Swift::String
+  public let typeIdentifier: Swift::String
+  public var makeEntity: AppIntentsTesting::IntentValuePropertiesCallable<AppIntentsTesting::AnyTransientAppEntity> {
+    get
+  }
+  public static func == (a: AppIntentsTesting::TransientAppEntityDefinition, b: AppIntentsTesting::TransientAppEntityDefinition) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::TransientAppEntityDefinition : AppIntentsTesting::AppIntentTypeDefinition {
+  public typealias Instance = AppIntentsTesting::AnyTransientAppEntity
+  public func isInstance(_ value: AppIntentsTesting::AnyTransientAppEntity) throws
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::TransientAppEntityDefinition {
+  public func resolved(from file: AppIntents::IntentFile) async throws -> AppIntentsTesting::AnyTransientAppEntity
+  public func resolved<T>(from value: T) async throws -> AppIntentsTesting::AnyTransientAppEntity where T : AppIntentsTypeSupport::IntentValueConvertible, T : CoreTransferable::Transferable
+  public func resolved<T>(from value: T) async throws -> AppIntentsTesting::AnyTransientAppEntity where T : AppIntents::_SystemIntentValue, T : AppIntentsTypeSupport::IntentValueConvertible
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct AnyEntityQuery : Swift::Sendable, Swift::Equatable {
+  public static func == (a: AppIntentsTesting::AnyEntityQuery, b: AppIntentsTesting::AnyEntityQuery) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEntityDefinition {
+  public func entityQuery(matching string: Swift::String) -> AppIntentsTesting::AnyEntityQuery
+  public func entities(matching string: Swift::String) async throws -> [AppIntentsTesting::AnyAppEntity]
+  public func entityQuery<Identifier>(identifiers: [Identifier]) -> AppIntentsTesting::AnyEntityQuery where Identifier : AppIntents::EntityIdentifierConvertible
+  public func entities<Identifier>(identifiers: [Identifier]) async throws -> [AppIntentsTesting::AnyAppEntity] where Identifier : AppIntents::EntityIdentifierConvertible
+  public func allEntitiesQuery() -> AppIntentsTesting::AnyEntityQuery
+  public func allEntities() async throws -> [AppIntentsTesting::AnyAppEntity]
+  public func suggestedEntitiesQuery() -> AppIntentsTesting::AnyEntityQuery
+  public func suggestedEntities() async throws -> [AppIntentsTesting::AnyAppEntity]
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct ResolvedValueQueryResult : Swift::Sendable {
+  public let items: AppIntentsTesting::DynamicPropertyPathCollection
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct AnyAppEnum : Swift::Sendable, Swift::Equatable {
+  public var typeIdentifier: Swift::String {
+    get
+    set
+  }
+  public var rawValue: Swift::String {
+    get
+    set
+  }
+  public init(typeIdentifier: Swift::String, rawValue: Swift::String)
+  public func `as`<T>(_ type: T.Type) throws -> T where T : Swift::LosslessStringConvertible
+  public static func == (a: AppIntentsTesting::AnyAppEnum, b: AppIntentsTesting::AnyAppEnum) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppEnum {
+  public init(typeIdentifier: Swift::String, value: any Swift::LosslessStringConvertible)
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppEnum : Swift::CustomStringConvertible {
+  public var description: Swift::String {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppEnum : AppIntentsTypeSupport::IntentValueConvertible {
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicMemberLookup public struct AnyAppIntent : Swift::Sendable, Swift::Equatable {
+  public let bundleIdentifier: Swift::String
+  public let identifier: Swift::String
+  public subscript<T>(dynamicMember identifier: Swift::String) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  public subscript(dynamicMember identifier: Swift::String) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get
+    set
+  }
+  @_disfavoredOverload public subscript(dynamicMember identifier: Swift::String) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+  @discardableResult
+  public func run() async throws -> AppIntentsTesting::ResolvedIntentResult
+  public static func == (a: AppIntentsTesting::AnyAppIntent, b: AppIntentsTesting::AnyAppIntent) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AnyAppIntent : Swift::CustomStringConvertible {
+  public var description: Swift::String {
+    get
+  }
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEntityDefinition {
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public func spotlightQuery(_ userQuery: Swift::String? = nil) async throws -> [AppIntentsTesting::AnyAppEntity]
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+extension AppIntentsTesting::AppEntityDefinition {
+  public func viewAnnotations() async throws -> [AppIntentsTesting::ViewAnnotation]
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+public struct ViewAnnotation : Swift::Sendable, Swift::Equatable {
+  public let isSelected: Swift::Bool
+  public let entity: AppIntentsTesting::AnyAppEntity
+  public static func == (a: AppIntentsTesting::ViewAnnotation, b: AppIntentsTesting::ViewAnnotation) -> Swift::Bool
+}
+@available(macOS 27.0, iOS 27.0, watchOS 27.0, tvOS 27.0, visionOS 27.0, *)
+@dynamicMemberLookup public struct ResolvedIntentResult : Swift::Sendable, Swift::Equatable {
+  public struct ValueKeyPath {
+    public let value: Swift::Never
+  }
+  public subscript<T>(dynamicMember keyPath: Swift::KeyPath<AppIntentsTesting::ResolvedIntentResult.AppIntentsTesting::ValueKeyPath, Swift::Never>) -> T where T : AppIntentsTypeSupport::IntentValueConvertible {
+    get throws
+  }
+  @_disfavoredOverload public subscript(dynamicMember keyPath: Swift::KeyPath<AppIntentsTesting::ResolvedIntentResult.AppIntentsTesting::ValueKeyPath, Swift::Never>) -> (any AppIntentsTypeSupport::IntentValueExpressing)? {
+    get
+  }
+  @_disfavoredOverload public subscript(dynamicMember keyPath: Swift::KeyPath<AppIntentsTesting::ResolvedIntentResult.AppIntentsTesting::ValueKeyPath, Swift::Never>) -> AppIntentsTesting::DynamicPropertyPath {
+    get
+  }
+  public static func == (a: AppIntentsTesting::ResolvedIntentResult, b: AppIntentsTesting::ResolvedIntentResult) -> Swift::Bool
+}

@@ -1,0 +1,11 @@
+_Testing_CoreGraphics.framework
+_Testing_CoreImage.framework
+_Testing_CoreTransferable.framework
+_Testing_Foundation.framework
+_Testing_UIKit.framework
+AppIntentsTesting.framework
+Evaluations.framework
+StoreKitTest.framework
+Testing.framework
+XCTest.framework
+XCUIAutomation.framework
