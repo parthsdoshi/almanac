@@ -15,7 +15,6 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     CODE_SIGN_STYLE: Automatic
-    TARGETED_DEVICE_FAMILY: "1"   # iPhone only
 targets:
   Occasions:
     type: application
@@ -54,6 +53,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID)
         PRODUCT_MODULE_NAME: Occasions
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only. Must be per target: XcodeGen's iOS preset sets "1,2" on each target, which beats a project-level value.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon   # placeholder icon, App/Assets.xcassets
     dependencies:
       - target: OccasionsWidget
@@ -81,6 +81,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).widget
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) WIDGET_EXTENSION
+        TARGETED_DEVICE_FAMILY: "1"
   OccasionsTests:
     type: bundle.unit-test
     platform: iOS

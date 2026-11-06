@@ -1,10 +1,12 @@
 # Builds the iOS app on a Mac runner and uploads it to TestFlight.
-# Run it by hand: Actions > TestFlight > Run workflow.
+# Run it by hand (Actions > TestFlight > Run workflow), or push to the testflight branch.
 # Needs the repo secrets listed in README.md ("TestFlight").
 name: TestFlight
 
 on:
   workflow_dispatch:
+  push:
+    branches: [testflight]   # pushing to this branch also uploads a build
 
 concurrency:
   group: testflight
