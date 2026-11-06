@@ -74,7 +74,7 @@ struct WorkoutSessionView: View {
                 Text("\(session.steps.count) sets · about \(session.def.estimatedMinutes) min")
                     .font(.subheadline).foregroundStyle(Theme.Colors.inkSoft)
             }
-            FlowTags(tags: session.def.muscles)
+            MusclesWorked(muscles: session.def.muscles, title: "Muscles worked")
             Text("Five minutes of easy cardio, then a light set of the first exercise.")
                 .font(Theme.Typography.display(17, .italic))
                 .foregroundStyle(Theme.Colors.inkSoft)
@@ -100,7 +100,7 @@ struct WorkoutSessionView: View {
                         .font(Theme.Typography.display(34, .black, relativeTo: .largeTitle))
                         .foregroundStyle(Theme.Colors.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    FlowTags(tags: ex.muscles).padding(.top, 4)
+                    MusclesWorked(muscles: ex.muscles, mapWidth: 40).padding(.top, 4)
                 }
 
                 let w = session.weight(for: ex)
@@ -311,6 +311,16 @@ struct WorkoutSummaryView: View {
                         .padding(Theme.Spacing.m)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.Colors.gold, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+                }
+
+                let worked = rows.reduce(into: [String]()) { out, row in
+                    for m in row.exercise.muscles where !out.contains(m) { out.append(m) }
+                }
+                if !worked.isEmpty {
+                    SectionTitle(title: "Muscles worked")
+                    MusclesWorked(muscles: worked, mapWidth: 50)
+                        .padding(Theme.Spacing.l)
+                        .paperCard()
                 }
 
                 SectionTitle(title: "How it went")

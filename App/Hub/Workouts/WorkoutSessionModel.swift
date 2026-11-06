@@ -104,6 +104,7 @@ final class WorkoutSessionModel {
     /// Saves the session to the log. Returns what the summary needs.
     func finish() -> (session: WorkoutSession, graduations: [WorkoutEngine.Graduation])? {
         cancelRestAlert()
+        WorkoutActivity.endAll()
         UIApplication.shared.isIdleTimerDisabled = false
         Self.clearSaved()
         let notes = exerciseNotes.compactMapValues { v -> String? in
@@ -122,6 +123,7 @@ final class WorkoutSessionModel {
 
     func discard() {
         cancelRestAlert()
+        WorkoutActivity.endAll()
         UIApplication.shared.isIdleTimerDisabled = false
         Self.clearSaved()
     }
@@ -163,6 +165,7 @@ final class WorkoutSessionModel {
         let snap = Snapshot(workout: def.id, stepIndex: stepIndex, phase: phase, sets: sets, exerciseNotes: exerciseNotes,
                             startedAt: startedAt, restEndsAt: restEndsAt, restTotal: restTotal)
         if let data = try? JSONEncoder().encode(snap) { UserDefaults.standard.set(data, forKey: Self.savedKey) }
+        WorkoutActivity.sync(self)
     }
 
     static func clearSaved() { UserDefaults.standard.removeObject(forKey: savedKey) }

@@ -460,6 +460,12 @@ final class AppModel {
     // MARK: Deep links & actions
 
     func handle(url: URL) async {
+        // The workout Live Activity: bring back a workout the system closed in the background.
+        if url.scheme == DeepLink.scheme, url.host == "workout" {
+            let ui = WorkoutUI.shared
+            if ui.active == nil, ui.resumable != nil { ui.resume() }
+            return
+        }
         guard let link = DeepLink.parse(url) else { return }
         if occasions.isEmpty { await reload() }
         guard let o = occasion(id: link.occasionID) else {

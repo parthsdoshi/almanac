@@ -18,6 +18,11 @@ final class WorkoutUI {
     var finished: Finished?
     var resumable = WorkoutSessionModel.resumable
 
+    init() {
+        // A workout Live Activity with no workout behind it (the log was saved or dropped elsewhere).
+        if resumable == nil { WorkoutActivity.endAll() }
+    }
+
     var isPresented: Bool { active != nil || finished != nil }
 
     func start(_ id: WorkoutID, hub: HubStore = .shared) {
@@ -33,6 +38,7 @@ final class WorkoutUI {
 
     func discardResumable() {
         WorkoutSessionModel.clearSaved()
+        WorkoutActivity.endAll()
         resumable = nil
     }
 
@@ -302,6 +308,11 @@ struct UpNextCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.Colors.ink)
 
+            MusclesWorked(muscles: def.muscles, title: "Muscles worked")
+                .padding(.horizontal, Theme.Spacing.l)
+                .padding(.vertical, 14)
+            HairRule()
+
             ForEach(Array(def.blocks.enumerated()), id: \.offset) { i, block in
                 if i > 0 { HairRule() }
                 BlockRow(block: block, log: log)
@@ -416,6 +427,15 @@ private struct SessionDetailView: View {
                 }
                 .listRowBackground(Color.clear)
             }
+            if !muscles.isEmpty {
+                Section {
+                    MusclesWorked(muscles: muscles, mapWidth: 44)
+                        .padding(.vertical, 6)
+                } header: {
+                    SectionTitle(title: "Muscles worked")
+                }
+                .listRowBackground(Theme.Colors.card)
+            }
             ForEach(groups) { g in
                 Section {
                     Text(g.sets.map { "\(WorkoutEngine.formatWeight($0.weight)) × \($0.reps)" }.joined(separator: ",  "))
@@ -438,6 +458,14 @@ private struct SessionDetailView: View {
         let id: String
         let name: String
         let sets: [LoggedSet]
+    }
+
+    private var muscles: [String] {
+        var out: [String] = []
+        for g in groups {
+            for m in WorkoutPlan.exercise(id: g.id)?.muscles ?? [] where !out.contains(m) { out.append(m) }
+        }
+        return out
     }
 
     private var groups: [ExerciseGroup] {

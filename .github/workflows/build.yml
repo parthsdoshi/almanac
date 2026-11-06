@@ -5,7 +5,7 @@ name: Build
 
 on:
   push:
-    branches: [main, widget, feedback, hub, health, jot, icloud, ios27, ios27-icloud, hotfix]
+    branches: [main, widget, feedback, hub, health, jot, icloud, ios27, ios27-icloud, hotfix, workout-live]
   pull_request:
   workflow_dispatch:
 
