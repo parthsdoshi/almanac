@@ -1,0 +1,4 @@
+=== iOS-27-0 (F9F3FA54-4DDB-4ACB-A256-1F0F49915CEA)
+fresh: NOT running
+contacts: NOT running
+=== iOS-27-1 (Unable to create a device for device type: iPhone 7 (com.apple.CoreSimulator.SimDeviceType.iPhone-7), runtime: iOS 27.1 (27.1 - 24A94425) - com.apple.CoreSimulator.SimRuntime.iOS-27-1)
