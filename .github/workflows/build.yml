@@ -34,19 +34,16 @@ jobs:
           brew install xcodegen
           xcodegen generate
 
-      - name: Build app, widget and tests
+      - name: Build and run the tests on a Simulator
         run: |
-          xcodebuild build-for-testing \
-            -project Occasions.xcodeproj \
-            -scheme Occasions \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Run the tests on a Simulator
-        run: |
+          # One xcodebuild for the exact Simulator the tests run on. A generic Simulator build
+          # first compiled everything twice and held a Mac runner for it.
           # Newest iOS that has a regular iPhone (27.1 on this image only runs the two-screen iPhone Duo).
           UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin)["devices"]; v=lambda k:[int(n) for n in re.findall(r"\d+", k.split("iOS-")[-1])[:2]]; c=[(v(k),x["udid"]) for k in d if "SimRuntime.iOS-" in k for x in d[k] if re.fullmatch(r"iPhone \d+( Pro)?", x["name"])]; c.sort(); print(c[-1][1])')
           echo "Testing on $UDID"
+          # Boot the Simulator in the background so it boots while the app compiles. Booting
+          # takes minutes on these runners and simctl boot blocks until it's done.
+          (xcrun simctl boot "$UDID" >/dev/null 2>&1 || true) &
           xcodebuild test \
             -project Occasions.xcodeproj \
             -scheme Occasions \
